@@ -50,7 +50,14 @@ public class DefaultSqlSession implements SqlSession {
   private final Configuration configuration;
   private final Executor executor;
 
+  /**
+   * 当前会话是否需要自动提交，默认false
+   */
   private final boolean autoCommit;
+
+  /**
+   * 标志当前会话是否是脏会话，即进行过增删改操作
+   */
   private boolean dirty;
   private List<Cursor<?>> cursorList;
 
@@ -146,6 +153,7 @@ public class DefaultSqlSession implements SqlSession {
     try {
       // 从Configuration获取mappedStatement
       MappedStatement ms = configuration.getMappedStatement(statement);
+
       return executor.query(ms, wrapCollection(parameter), rowBounds, Executor.NO_RESULT_HANDLER);
     } catch (Exception e) {
       throw ExceptionFactory.wrapException("Error querying database.  Cause: " + e, e);
@@ -315,6 +323,8 @@ public class DefaultSqlSession implements SqlSession {
   }
 
   private boolean isCommitOrRollbackRequired(boolean force) {
+    // 不是自动提交，并且是脏事务
+    // 或者需要强制提交
     return (!autoCommit && dirty) || force;
   }
 

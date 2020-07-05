@@ -144,9 +144,11 @@ public abstract class BaseExecutor implements Executor {
     if (closed) {
       throw new ExecutorException("Executor was closed.");
     }
+
     if (queryStack == 0 && ms.isFlushCacheRequired()) {
       clearLocalCache();
     }
+
     List<E> list;
     try {
       queryStack++;
@@ -333,6 +335,8 @@ public abstract class BaseExecutor implements Executor {
       localCache.removeObject(key);
     }
     localCache.putObject(key, list);
+
+    // 如果是存储过程调用，缓存存储过程参数
     if (ms.getStatementType() == StatementType.CALLABLE) {
       localOutputParameterCache.putObject(key, parameter);
     }

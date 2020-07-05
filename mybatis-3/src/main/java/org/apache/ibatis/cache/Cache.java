@@ -47,16 +47,13 @@ public interface Cache {
   String getId();
 
   /**
-   * @param key
-   *          Can be any object but usually it is a {@link CacheKey}
-   * @param value
-   *          The result of a select.
+   * @param key Can be any object but usually it is a {@link CacheKey}
+   * @param value The result of a select.
    */
   void putObject(Object key, Object value);
 
   /**
-   * @param key
-   *          The key
+   * @param key The key
    * @return The object stored in the cache.
    */
   Object getObject(Object key);
@@ -72,8 +69,7 @@ public interface Cache {
    * available instead of hitting the database.
    *
    *
-   * @param key
-   *          The key
+   * @param key The key
    * @return Not used
    */
   Object removeObject(Object key);
@@ -92,8 +88,7 @@ public interface Cache {
 
   /**
    * Optional. As of 3.2.6 this method is no longer called by the core.
-   * <p>
-   * Any locking needed by the cache must be provided internally by the cache provider.
+   * <p>Any locking needed by the cache must be provided internally by the cache provider.
    *
    * @return A ReadWriteLock
    */
