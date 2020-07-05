@@ -33,6 +33,7 @@ import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.transaction.Transaction;
 
 /**
+ * 包装了具体的Executor，负责实现数据缓存，如果没有命中缓存，再委派给具体Executor执行
  * @author Clinton Begin
  * @author Eduardo Macarron
  */
