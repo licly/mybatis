@@ -44,6 +44,11 @@ public final class MappedStatement {
   private Cache cache;
   private ParameterMap parameterMap;
   private List<ResultMap> resultMaps;
+
+  /**
+   * false：MappedStatement的SQLCommandType是Select
+   * true：update
+   */
   private boolean flushCacheRequired;
   private boolean useCache;
   private boolean resultOrdered;

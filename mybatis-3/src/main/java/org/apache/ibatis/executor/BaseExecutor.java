@@ -326,6 +326,9 @@ public abstract class BaseExecutor implements Executor {
     }
   }
 
+  /**
+   * 维护一级缓存
+   */
   private <E> List<E> queryFromDatabase(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, CacheKey key, BoundSql boundSql) throws SQLException {
     List<E> list;
     localCache.putObject(key, EXECUTION_PLACEHOLDER);
