@@ -33,6 +33,7 @@ import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.transaction.Transaction;
 
 /**
+ * 包装了具体的Executor，负责实现二级缓存，先从二级缓存查询，如果没有命中缓存，再委派给具体Executor执行
  * @author Clinton Begin
  * @author Eduardo Macarron
  */
@@ -93,6 +94,7 @@ public class CachingExecutor implements Executor {
   @Override
   public <E> List<E> query(MappedStatement ms, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler, CacheKey key, BoundSql boundSql)
       throws SQLException {
+    // 二级缓存，存储在MappedStatement，与应用同生命周期
     Cache cache = ms.getCache();
     if (cache != null) {
       flushCacheIfRequired(ms);

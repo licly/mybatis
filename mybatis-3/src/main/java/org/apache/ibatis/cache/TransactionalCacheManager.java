@@ -31,6 +31,9 @@ public class TransactionalCacheManager {
     getTransactionalCache(cache).clear();
   }
 
+  /**
+   * 通过CacheKey获取缓存数据
+   */
   public Object getObject(Cache cache, CacheKey key) {
     return getTransactionalCache(cache).getObject(key);
   }
@@ -51,6 +54,9 @@ public class TransactionalCacheManager {
     }
   }
 
+  /**
+   * 返回一个二级缓存对象，如果没有就新建一个
+   */
   private TransactionalCache getTransactionalCache(Cache cache) {
     return transactionalCaches.computeIfAbsent(cache, TransactionalCache::new);
   }
