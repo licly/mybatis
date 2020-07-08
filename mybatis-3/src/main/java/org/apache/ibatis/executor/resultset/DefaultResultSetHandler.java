@@ -174,9 +174,9 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     }
   }
 
-  //
-  // HANDLE RESULT SETS
-  //
+  /**
+   * HANDLE RESULT SETS
+   */
   @Override
   public List<Object> handleResultSets(Statement stmt) throws SQLException {
     ErrorContext.instance().activity("handling results").object(mappedStatement.getId());
@@ -238,6 +238,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     while (rs == null) {
       // move forward to get the first resultset in case the driver
       // doesn't return the resultset as the first result (HSQLDB 2.1)
+      // stmt.getMoreResults() true: if the next result is a ResultSet object; false: if it is an update count or there are no more results
       if (stmt.getMoreResults()) {
         rs = stmt.getResultSet();
       } else {

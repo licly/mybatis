@@ -56,9 +56,12 @@ public class ResultSetWrapper {
     this.resultSet = rs;
     final ResultSetMetaData metaData = rs.getMetaData();
     final int columnCount = metaData.getColumnCount();
+
     for (int i = 1; i <= columnCount; i++) {
+      // getColumnLabel:获取AS别名，getColumnName：获取field字段名
       columnNames.add(configuration.isUseColumnLabel() ? metaData.getColumnLabel(i) : metaData.getColumnName(i));
       jdbcTypes.add(JdbcType.forCode(metaData.getColumnType(i)));
+      // 每一列对应的Java类型的Class全限定名
       classNames.add(metaData.getColumnClassName(i));
     }
   }
@@ -79,6 +82,9 @@ public class ResultSetWrapper {
     return jdbcTypes;
   }
 
+  /**
+   * 获取列名对应的jdbcType
+   */
   public JdbcType getJdbcType(String columnName) {
     for (int i = 0; i < columnNames.size(); i++) {
       if (columnNames.get(i).equalsIgnoreCase(columnName)) {
@@ -93,10 +99,8 @@ public class ResultSetWrapper {
    * Tries to get from the TypeHandlerRegistry by searching for the property type.
    * If not found it gets the column JDBC type and tries to get a handler for it.
    *
-   * @param propertyType
-   *          the property type
-   * @param columnName
-   *          the column name
+   * @param propertyType the property type
+   * @param columnName the column name
    * @return the type handler
    */
   public TypeHandler<?> getTypeHandler(Class<?> propertyType, String columnName) {
@@ -108,9 +112,11 @@ public class ResultSetWrapper {
     } else {
       handler = columnHandlers.get(propertyType);
     }
+
     if (handler == null) {
       JdbcType jdbcType = getJdbcType(columnName);
       handler = typeHandlerRegistry.getTypeHandler(propertyType, jdbcType);
+
       // Replicate logic of UnknownTypeHandler#resolveTypeHandler
       // See issue #59 comment 10
       if (handler == null || handler instanceof UnknownTypeHandler) {
@@ -124,6 +130,7 @@ public class ResultSetWrapper {
           handler = typeHandlerRegistry.getTypeHandler(jdbcType);
         }
       }
+
       if (handler == null || handler instanceof UnknownTypeHandler) {
         handler = new ObjectTypeHandler();
       }

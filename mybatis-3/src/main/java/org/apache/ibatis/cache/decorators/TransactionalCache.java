@@ -47,11 +47,7 @@ public class TransactionalCache implements Cache {
   private boolean clearOnCommit;
 
   /**
-<<<<<<< HEAD
    * 存放事务未提交时的缓存数据，事务提交时刷新到二级缓存Cache对象
-=======
-   * 二级缓存
->>>>>>> 732ef7f79fc34ecb240f87e3870f4d4e4eb65768
    */
   private final Map<Object, Object> entriesToAddOnCommit;
 
