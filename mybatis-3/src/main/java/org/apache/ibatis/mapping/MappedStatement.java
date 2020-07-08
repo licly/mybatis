@@ -139,6 +139,10 @@ public final class MappedStatement {
       return this;
     }
 
+    /**
+     * @param useCache in Default case，true：select，false：!select
+     * @return
+     */
     public Builder useCache(boolean useCache) {
       mappedStatement.useCache = useCache;
       return this;
