@@ -181,6 +181,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
   public List<Object> handleResultSets(Statement stmt) throws SQLException {
     ErrorContext.instance().activity("handling results").object(mappedStatement.getId());
 
+    // 存放要返回的数据
     final List<Object> multipleResults = new ArrayList<>();
 
     int resultSetCount = 0;
@@ -189,6 +190,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     List<ResultMap> resultMaps = mappedStatement.getResultMaps();
     int resultMapCount = resultMaps.size();
     validateResultMapsCount(rsw, resultMapCount);
+
     while (rsw != null && resultMapCount > resultSetCount) {
       ResultMap resultMap = resultMaps.get(resultSetCount);
       handleResultSet(rsw, resultMap, multipleResults, null);
@@ -345,11 +347,26 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     }
   }
 
+  /**
+   * 处理简单结果集
+   * @param rsw
+   * @param resultMap
+   * @param resultHandler
+   * @param rowBounds
+   * @param parentMapping
+   * @throws SQLException
+   */
   private void handleRowValuesForSimpleResultMap(ResultSetWrapper rsw, ResultMap resultMap, ResultHandler<?> resultHandler, RowBounds rowBounds, ResultMapping parentMapping)
       throws SQLException {
     DefaultResultContext<Object> resultContext = new DefaultResultContext<>();
     ResultSet resultSet = rsw.getResultSet();
     skipRows(resultSet, rowBounds);
+    /**
+     * 退出条件：
+     * 1、处理了足够条数据（limit限制）
+     * 2、resultSet关闭
+     * 3、resultSet下一条数据有效
+     */
     while (shouldProcessMoreRows(resultContext, rowBounds) && !resultSet.isClosed() && resultSet.next()) {
       ResultMap discriminatedResultMap = resolveDiscriminatedResultMap(resultSet, resultMap, null);
       Object rowValue = getRowValue(rsw, discriminatedResultMap, null);
@@ -371,6 +388,10 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     ((ResultHandler<Object>) resultHandler).handleResult(resultContext);
   }
 
+  /**
+   * 是否应该继续处理
+   * @return false：resultContext关闭 || resultContext处理数据行数达到limit
+   */
   private boolean shouldProcessMoreRows(ResultContext<?> context, RowBounds rowBounds) {
     return !context.isStopped() && context.getResultCount() < rowBounds.getLimit();
   }
@@ -381,6 +402,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
         rs.absolute(rowBounds.getOffset());
       }
     } else {
+      // 索引后推到offset所在位置
       for (int i = 0; i < rowBounds.getOffset(); i++) {
         if (!rs.next()) {
           break;

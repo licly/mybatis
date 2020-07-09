@@ -34,6 +34,7 @@ import org.apache.ibatis.transaction.Transaction;
 
 /**
  * 包装了具体的Executor，负责实现二级缓存，先从二级缓存查询，如果没有命中缓存，再委派给具体Executor执行
+ * 装饰器模式实现
  * @author Clinton Begin
  * @author Eduardo Macarron
  */

@@ -45,6 +45,7 @@ import org.apache.ibatis.transaction.Transaction;
 import org.apache.ibatis.type.TypeHandlerRegistry;
 
 /**
+ * 定义方法的执行流程以及通用逻辑，模板模式的体现
  * @author Clinton Begin
  */
 public abstract class BaseExecutor implements Executor {

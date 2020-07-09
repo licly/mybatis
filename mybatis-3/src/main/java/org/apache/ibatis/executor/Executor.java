@@ -28,6 +28,7 @@ import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.transaction.Transaction;
 
 /**
+ * MyBatis的SQL执行器，MyBatis中对数据库所有的增删改查操作都是由Executor组件完成的。
  * @author Clinton Begin
  */
 public interface Executor {

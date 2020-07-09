@@ -34,6 +34,7 @@ import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.transaction.Transaction;
 
 /**
+ * 对Statement对象进行缓存，执行相同的SQL语句时，直接从缓存中拿出Statement对象进行复用
  * @author Clinton Begin
  */
 public class ReuseExecutor extends BaseExecutor {
