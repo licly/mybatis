@@ -29,6 +29,7 @@ import org.apache.ibatis.scripting.LanguageDriver;
 import org.apache.ibatis.session.Configuration;
 
 /**
+ * 描述<select/update/insert/delete/>或@Select、@update等注解配置的SQL信息
  * @author Clinton Begin
  */
 public final class MappedStatement {
@@ -38,9 +39,29 @@ public final class MappedStatement {
   private String id;
   private Integer fetchSize;
   private Integer timeout;
+
+  /**
+   * 参数可选值为STATEMENT、PREPARED或CALLABLE，
+   * 这会让MyBatis分别使用Statement、PreparedStatement或CallableStatement与数据库交互，
+   * 默认值为PREPARED。
+   */
   private StatementType statementType;
+
+  /**
+   * 参数可选值为FORWARD_ONLY、SCROLL_SENSITIVE或SCROLL_INSENSITIVE，
+   * 用于设置ResultSet对象的特征，具体可参考第2章JDBC规范的相关内容。
+   * 默认未设置，由JDBC驱动决定。
+   */
   private ResultSetType resultSetType;
+
+  /**
+   * 解析<select/update/insert/delete/>得到SQLSource对象
+   */
   private SqlSource sqlSource;
+
+  /**
+   * 二级缓存实例
+   */
   private Cache cache;
   private ParameterMap parameterMap;
   private List<ResultMap> resultMaps;
@@ -50,15 +71,46 @@ public final class MappedStatement {
    * true：update
    */
   private boolean flushCacheRequired;
+
+  /**
+   * 是否使用二级缓存
+   */
   private boolean useCache;
+
+  /**
+   * 这个设置仅针对嵌套结果 select语句适用，如果为true，就是假定嵌套结果包含在一起或分组在一起，
+   * 这样的话，当返回一个主结果行的时候，就不会发生对前面结果集引用的情况。这就使得在获取嵌套结果集的时候不至于导致内存不够用，默认值为false。
+   */
   private boolean resultOrdered;
   private SqlCommandType sqlCommandType;
+
+  /**
+   * 主键生成策略，默认是Jdbc3KeyGenerator,即数据库自增主键
+   * 当配置了<selectKey>时，使用SelectKeyGenerator生成主键。
+   */
   private KeyGenerator keyGenerator;
+
+  /**
+   * 该属性仅对<update>和<insert>标签有用，
+   * 用于将数据库自增主键或者<insert>标签中<selectKey>标签返回的值填充到实体的属性中，如果有多个属性，则使用逗号分隔。
+   */
   private String[] keyProperties;
   private String[] keyColumns;
+
+  /**
+   * <select>标签中通过resultMap属性指定ResultMap是不是嵌套的ResultMap。
+   */
   private boolean hasNestedResultMaps;
   private String databaseId;
+
+  /**
+   * 用于输出日志
+   */
   private Log statementLog;
+
+  /**
+   * 指定LanguageDriver实现，MyBatis中的LanguageDriver用于解析<select|update|insert|delete>标签中的SQL语句，生成SqlSource对象。
+   */
   private LanguageDriver lang;
   private String[] resultSets;
 
@@ -139,6 +191,10 @@ public final class MappedStatement {
       return this;
     }
 
+    /**
+     * @param useCache in Default case，true：select，false：!select
+     * @return
+     */
     public Builder useCache(boolean useCache) {
       mappedStatement.useCache = useCache;
       return this;

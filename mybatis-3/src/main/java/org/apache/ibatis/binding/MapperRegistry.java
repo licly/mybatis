@@ -27,6 +27,7 @@ import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.SqlSession;
 
 /**
+ * 注册管理Mapper接口和MapperProxyFactory的对应关系
  * @author Clinton Begin
  * @author Eduardo Macarron
  * @author Lasse Voss
@@ -40,12 +41,20 @@ public class MapperRegistry {
     this.config = config;
   }
 
+  /**
+   * 获取MapperProxy代理对象
+   * @param type mapper接口类型
+   * @param sqlSession
+   * @return {@link MapperProxy} 对象
+   */
   @SuppressWarnings("unchecked")
   public <T> T getMapper(Class<T> type, SqlSession sqlSession) {
     final MapperProxyFactory<T> mapperProxyFactory = (MapperProxyFactory<T>) knownMappers.get(type);
     if (mapperProxyFactory == null) {
       throw new BindingException("Type " + type + " is not known to the MapperRegistry.");
     }
+
+    // 懒加载思想，获取mapper时再创建MapperProxy代理对象
     try {
       return mapperProxyFactory.newInstance(sqlSession);
     } catch (Exception e) {
@@ -57,11 +66,19 @@ public class MapperRegistry {
     return knownMappers.containsKey(type);
   }
 
+  /**
+   * 添加Mapper
+   * @param type
+   * @param <T>
+   */
   public <T> void addMapper(Class<T> type) {
     if (type.isInterface()) {
+      // 检查是否已绑定
       if (hasMapper(type)) {
         throw new BindingException("Type " + type + " is already known to the MapperRegistry.");
       }
+
+      // 添加到knownMapper缓存
       boolean loadCompleted = false;
       try {
         knownMappers.put(type, new MapperProxyFactory<>(type));
@@ -92,10 +109,8 @@ public class MapperRegistry {
   /**
    * Adds the mappers.
    *
-   * @param packageName
-   *          the package name
-   * @param superType
-   *          the super type
+   * @param packageName the package name
+   * @param superType the super type
    * @since 3.2.2
    */
   public void addMappers(String packageName, Class<?> superType) {
@@ -110,8 +125,7 @@ public class MapperRegistry {
   /**
    * Adds the mappers.
    *
-   * @param packageName
-   *          the package name
+   * @param packageName the package name
    * @since 3.2.2
    */
   public void addMappers(String packageName) {
