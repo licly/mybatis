@@ -91,9 +91,13 @@ public class XMLMapperBuilder extends BaseBuilder {
   }
 
   public void parse() {
+    // resource是否加载
     if (!configuration.isResourceLoaded(resource)) {
+      // 解析mapper文件
       configurationElement(parser.evalNode("/mapper"));
+      // 把resource添加到Configuration对象中
       configuration.addLoadedResource(resource);
+      // 添加mapper到MapperRegistry
       bindMapperForNamespace();
     }
 
@@ -106,24 +110,39 @@ public class XMLMapperBuilder extends BaseBuilder {
     return sqlFragments.get(refid);
   }
 
+  /**
+   * 解析mapper文件
+   * @param context
+   */
   private void configurationElement(XNode context) {
     try {
       String namespace = context.getStringAttribute("namespace");
       if (namespace == null || namespace.isEmpty()) {
         throw new BuilderException("Mapper's namespace cannot be empty");
       }
+
       builderAssistant.setCurrentNamespace(namespace);
+      // 解析<cache-ref/>标签
       cacheRefElement(context.evalNode("cache-ref"));
+      // 解析<cache/>标签
       cacheElement(context.evalNode("cache"));
+      // 解析<parameterMap/>标签
       parameterMapElement(context.evalNodes("/mapper/parameterMap"));
+      // 解析<resultMap/>标签
       resultMapElements(context.evalNodes("/mapper/resultMap"));
+      // 解析<sqlMap/>标签
       sqlElement(context.evalNodes("/mapper/sql"));
+      // 解析select|insert|update|delete标签
       buildStatementFromContext(context.evalNodes("select|insert|update|delete"));
     } catch (Exception e) {
       throw new BuilderException("Error parsing Mapper XML. The XML location is '" + resource + "'. Cause: " + e, e);
     }
   }
 
+  /**
+   * 解析mapper文件中所有的statement语句
+   * @param list
+   */
   private void buildStatementFromContext(List<XNode> list) {
     if (configuration.getDatabaseId() != null) {
       buildStatementFromContext(list, configuration.getDatabaseId());
@@ -132,6 +151,7 @@ public class XMLMapperBuilder extends BaseBuilder {
   }
 
   private void buildStatementFromContext(List<XNode> list, String requiredDatabaseId) {
+    // 遍历解析所有的select|insert|update|delete语句
     for (XNode context : list) {
       final XMLStatementBuilder statementParser = new XMLStatementBuilder(configuration, builderAssistant, context, requiredDatabaseId);
       try {
@@ -426,7 +446,7 @@ public class XMLMapperBuilder extends BaseBuilder {
       }
       if (boundType != null && !configuration.hasMapper(boundType)) {
         // Spring may not know the real resource name so we set a flag
-        // to prevent loading again this resource from the mapper interface
+        // to prevent(防止、阻止) loading again this resource from the mapper interface
         // look at MapperAnnotationBuilder#loadXmlResource
         configuration.addLoadedResource("namespace:" + namespace);
         configuration.addMapper(boundType);

@@ -100,8 +100,10 @@ public class TypeAliasRegistry {
     registerAlias("ResultSet", ResultSet.class);
   }
 
+  /**
+   * throws class cast exception as well if types cannot be assigned（分配、指配）
+   */
   @SuppressWarnings("unchecked")
-  // throws class cast exception as well if types cannot be assigned
   public <T> Class<T> resolveAlias(String string) {
     try {
       if (string == null) {
@@ -110,6 +112,7 @@ public class TypeAliasRegistry {
       // issue #748
       String key = string.toLowerCase(Locale.ENGLISH);
       Class<T> value;
+      // 先从typeAlias获取，如果没有，说明是一个class的全限定名
       if (typeAliases.containsKey(key)) {
         value = (Class<T>) typeAliases.get(key);
       } else {

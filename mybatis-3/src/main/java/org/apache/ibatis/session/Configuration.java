@@ -310,7 +310,8 @@ public class Configuration {
    * MappedStatement对象描述<insert|select|update|delete>等标签或者通过@Select、@Delete、@Update、@Insert等注解配置的SQL信息。
    * MyBatis将所有的MappedStatement对象注册到该属性中，其中Key为Mapper的Id，Value为MappedStatement对象。
    */
-  protected final Map<String, MappedStatement> mappedStatements = new StrictMap<MappedStatement>("Mapped Statements collection")
+  protected final Map<String, MappedStatement> mappedStatements
+    = new StrictMap<MappedStatement>("Mapped Statements collection")
       .conflictMessageProducer((savedValue, targetValue) ->
           ". please check " + savedValue.getResource() + " and " + targetValue.getResource());
 
@@ -340,7 +341,8 @@ public class Configuration {
   protected final Map<String, KeyGenerator> keyGenerators = new StrictMap<>("Key Generators collection");
 
   /**
-   * 用于注册所有Mapper接口、 XML配置文件路径。
+   * 用于注册所有Mapper接口、 XML配置文件路径。防止spring再次加载该mapper
+   * look at MapperAnnotationBuilder#loadXmlResource
    */
   protected final Set<String> loadedResources = new HashSet<>();
 

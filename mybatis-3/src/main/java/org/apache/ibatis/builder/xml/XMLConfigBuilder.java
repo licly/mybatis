@@ -383,10 +383,13 @@ public class XMLConfigBuilder extends BaseBuilder {
         configuration.addMappers(mapperPackage);
       } else {
         // 使用相对路径定位mapper文件
+        // e.g. <mapper resource="org/mybatis/builder/PostMapper.xml"/>
         String resource = child.getStringAttribute("resource");
         // 使用绝对路径
+        // e.g. <mapper url="file:///var/mappers/PostMapper.xml"/>
         String url = child.getStringAttribute("url");
         // 使用包名
+        // e.g. <package name="org.mybatis.builder"/>
         String mapperClass = child.getStringAttribute("class");
 
         if (resource != null && url == null && mapperClass == null) {

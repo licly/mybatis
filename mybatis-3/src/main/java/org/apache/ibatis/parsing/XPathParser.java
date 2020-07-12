@@ -207,6 +207,11 @@ public class XPathParser {
     return xnodes;
   }
 
+  /**
+   * 获取根据点对应的XNode节点
+   * @param expression
+   * @return
+   */
   public XNode evalNode(String expression) {
     return evalNode(document, expression);
   }

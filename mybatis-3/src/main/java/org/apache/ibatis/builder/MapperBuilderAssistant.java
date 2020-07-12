@@ -50,6 +50,7 @@ import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.TypeHandler;
 
 /**
+ * 辅助对象，用来构建Mapper相关的对象，例如Cache、ParameterMap、ResultMap等
  * 创建Mapper，每个namespace对应一个MapperBuilderAssistant实例
  * namespace里的多个MappedStatement对应一个MapperBuilderAssistant
  * @author Clinton Begin
