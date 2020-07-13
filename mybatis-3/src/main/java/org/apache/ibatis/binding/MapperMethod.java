@@ -236,6 +236,9 @@ public class MapperMethod {
 
   }
 
+  /**
+   * 存储SQL语句的类型，Mapper的id等
+   */
   public static class SqlCommand {
 
     private final String name;
@@ -243,9 +246,10 @@ public class MapperMethod {
 
     public SqlCommand(Configuration configuration, Class<?> mapperInterface, Method method) {
       final String methodName = method.getName();
+      // 获取声明该方法的类或接口的class对象
       final Class<?> declaringClass = method.getDeclaringClass();
-      MappedStatement ms = resolveMappedStatement(mapperInterface, methodName, declaringClass,
-          configuration);
+      MappedStatement ms = resolveMappedStatement(
+        mapperInterface, methodName, declaringClass, configuration);
       if (ms == null) {
         // 如果方法标有@Flush注解，SQL类型是FLUSH
         if (method.getAnnotation(Flush.class) != null) {
@@ -272,11 +276,14 @@ public class MapperMethod {
       return type;
     }
 
+    /**
+     * 解析获取MappedStatement对象
+     */
     private MappedStatement resolveMappedStatement(Class<?> mapperInterface, String methodName,
         Class<?> declaringClass, Configuration configuration) {
       String statementId = mapperInterface.getName() + "." + methodName;
 
-      // XML里面有对应SQL
+      // XML里面有对应MappedStatement对象
       if (configuration.hasStatement(statementId)) {
         return configuration.getMappedStatement(statementId);
 
@@ -299,10 +306,14 @@ public class MapperMethod {
     }
   }
 
+  /**
+   * 获取方法的签名信息，比如Mapper方法的参数名、参数注解等信息
+   */
   public static class MethodSignature {
 
     private final boolean returnsMany;
     private final boolean returnsMap;
+    // true：返回值类型是void
     private final boolean returnsVoid;
     private final boolean returnsCursor;
     private final boolean returnsOptional;
@@ -313,6 +324,7 @@ public class MapperMethod {
     private final ParamNameResolver paramNameResolver;
 
     public MethodSignature(Configuration configuration, Class<?> mapperInterface, Method method) {
+      // 获取Mapper方法的返回值类型
       Type resolvedReturnType = TypeParameterResolver.resolveReturnType(method, mapperInterface);
       if (resolvedReturnType instanceof Class<?>) {
         this.returnType = (Class<?>) resolvedReturnType;
@@ -327,8 +339,12 @@ public class MapperMethod {
       this.returnsOptional = Optional.class.equals(this.returnType);
       this.mapKey = getMapKey(method);
       this.returnsMap = this.mapKey != null;
+
+      // 记录RowBounds参数位置，用于处理后续的分页查询，同时记录ResultHandler参数位置，用于处理从数据库中检索的每一行数据。
       this.rowBoundsIndex = getUniqueParamIndex(method, RowBounds.class);
       this.resultHandlerIndex = getUniqueParamIndex(method, ResultHandler.class);
+
+      // 创建ParamNameResolver对象。ParamNameResolver对象用于解析Mapper方法中的参数名称及参数注解信息。
       this.paramNameResolver = new ParamNameResolver(configuration, method);
     }
 
