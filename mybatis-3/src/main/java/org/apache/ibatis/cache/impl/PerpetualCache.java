@@ -77,6 +77,7 @@ public class PerpetualCache implements Cache {
     }
 
     Cache otherCache = (Cache) o;
+    // id相同，即表示两个Cache对象相同
     return getId().equals(otherCache.getId());
   }
 

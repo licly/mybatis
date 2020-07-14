@@ -67,6 +67,7 @@ public class BlockingCache implements Cache {
   public Object getObject(Object key) {
     acquireLock(key);
     Object value = delegate.getObject(key);
+    // value为null的话，后续需要putObject，所以不释放锁
     if (value != null) {
       releaseLock(key);
     }
@@ -76,6 +77,7 @@ public class BlockingCache implements Cache {
   @Override
   public Object removeObject(Object key) {
     // despite of its name, this method is called only to release locks
+    // 仅用来释放锁
     releaseLock(key);
     return null;
   }

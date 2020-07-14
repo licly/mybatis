@@ -26,7 +26,13 @@ public class LoggingCache implements Cache {
 
   private final Log log;
   private final Cache delegate;
+  /**
+   * 记录缓存请求次数
+   */
   protected int requests = 0;
+  /**
+   * 记录缓存命中次数
+   */
   protected int hits = 0;
 
   public LoggingCache(Cache delegate) {
@@ -53,9 +59,11 @@ public class LoggingCache implements Cache {
   public Object getObject(Object key) {
     requests++;
     final Object value = delegate.getObject(key);
+    // 缓存命中后，hits+1
     if (value != null) {
       hits++;
     }
+    // 输出缓存命中率
     if (log.isDebugEnabled()) {
       log.debug("Cache Hit Ratio [" + getId() + "]: " + getHitRatio());
     }
