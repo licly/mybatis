@@ -56,8 +56,14 @@ public abstract class BaseExecutor implements Executor {
   protected Executor wrapper;
 
   protected ConcurrentLinkedQueue<DeferredLoad> deferredLoads;
+
+  /**
+   * 一级缓存对象
+   */
   protected PerpetualCache localCache;
-  // 缓存存储过程返回的结果
+  /**
+   * 存储过程输出参数缓存
+   */
   protected PerpetualCache localOutputParameterCache;
   protected Configuration configuration;
 
@@ -134,6 +140,7 @@ public abstract class BaseExecutor implements Executor {
   @Override
   public <E> List<E> query(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler) throws SQLException {
     BoundSql boundSql = ms.getBoundSql(parameter);
+    // 创建缓存的key对象
     CacheKey key = createCacheKey(ms, parameter, rowBounds, boundSql);
     return query(ms, parameter, rowBounds, resultHandler, key, boundSql);
   }
@@ -146,7 +153,7 @@ public abstract class BaseExecutor implements Executor {
       throw new ExecutorException("Executor was closed.");
     }
 
-    // ms.isFlushCacheRequired() == true表示SqlCommandType是!select类型
+    // ms.isFlushCacheRequired() == true 表示 Mapper 方法需要flush，默认只有select不需要flush
     if (queryStack == 0 && ms.isFlushCacheRequired()) {
       clearLocalCache();
     }
@@ -200,6 +207,15 @@ public abstract class BaseExecutor implements Executor {
     }
   }
 
+  /**
+   * CacheKey与ms.getId()、offset、limit、所有参数、configuration.getEnvironment().getId()有关
+   * 只有这些数据都一致时，才会认为两次查询执行的是相同的SQL
+   * @param ms
+   * @param parameterObject
+   * @param rowBounds
+   * @param boundSql
+   * @return
+   */
   @Override
   public CacheKey createCacheKey(MappedStatement ms, Object parameterObject, RowBounds rowBounds, BoundSql boundSql) {
     if (closed) {
@@ -331,7 +347,7 @@ public abstract class BaseExecutor implements Executor {
   }
 
   /**
-   * 维护一级缓存
+   * 模板模式，维护了一级缓存，具体查库操作由子类实现
    */
   private <E> List<E> queryFromDatabase(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, CacheKey key, BoundSql boundSql) throws SQLException {
     List<E> list;
@@ -396,7 +412,7 @@ public abstract class BaseExecutor implements Executor {
 
     public void load() {
       @SuppressWarnings("unchecked")
-      // we suppose we get back a List
+      // we suppose（假设） we get back a List
       List<Object> list = (List<Object>) localCache.getObject(key);
       Object value = resultExtractor.extractObjectFromList(list, targetType);
       resultObject.setValue(property, value);

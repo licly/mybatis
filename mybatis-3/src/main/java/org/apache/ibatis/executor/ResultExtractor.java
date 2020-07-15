@@ -36,12 +36,17 @@ public class ResultExtractor {
 
   public Object extractObjectFromList(List<Object> list, Class<?> targetType) {
     Object value = null;
+    // 返回类型是list
     if (targetType != null && targetType.isAssignableFrom(list.getClass())) {
       value = list;
+
+      // 返回类型是collection
     } else if (targetType != null && objectFactory.isCollection(targetType)) {
       value = objectFactory.create(targetType);
       MetaObject metaObject = configuration.newMetaObject(value);
       metaObject.addAll(list);
+
+      // 返回类型是数组
     } else if (targetType != null && targetType.isArray()) {
       Class<?> arrayComponentType = targetType.getComponentType();
       Object array = Array.newInstance(arrayComponentType, list.size());

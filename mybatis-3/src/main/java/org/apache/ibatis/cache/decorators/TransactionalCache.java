@@ -25,7 +25,8 @@ import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.logging.LogFactory;
 
 /**
- * 二级缓存 缓冲区
+ * 事务缓存装饰器，调用commit方法时，才会把缓存刷新到二级缓存；
+ * 调用了rollback方法，将会回滚
  * The 2nd level cache transactional buffer.
  * <p>
  * This class holds all cache entries that are to be added to the 2nd level cache during a Session.
@@ -39,10 +40,6 @@ import org.apache.ibatis.logging.LogFactory;
 public class TransactionalCache implements Cache {
 
   private static final Log log = LogFactory.getLog(TransactionalCache.class);
-
-  /**
-   * 装饰了Cache对象
-   */
   private final Cache delegate;
   private boolean clearOnCommit;
 

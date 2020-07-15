@@ -29,9 +29,21 @@ import org.apache.ibatis.cache.Cache;
  * @author Clinton Begin
  */
 public class SoftCache implements Cache {
+
+  /**
+   * 强引用队列，get缓存时，如果缓存未被回收，就会放入这里，避免被回收
+   */
   private final Deque<Object> hardLinksToAvoidGarbageCollection;
+
+  /**
+   * 引用队列，注册到该队列的对象表示已经被回收
+   */
   private final ReferenceQueue<Object> queueOfGarbageCollectedEntries;
   private final Cache delegate;
+
+  /**
+   * queueOfGarbageCollectedEntries 大小
+   */
   private int numberOfHardLinks;
 
   public SoftCache(Cache delegate) {
@@ -75,6 +87,7 @@ public class SoftCache implements Cache {
         // See #586 (and #335) modifications need more than a read lock
         synchronized (hardLinksToAvoidGarbageCollection) {
           hardLinksToAvoidGarbageCollection.addFirst(result);
+          // 如果强引用队列已满，溢出最早入队缓存
           if (hardLinksToAvoidGarbageCollection.size() > numberOfHardLinks) {
             hardLinksToAvoidGarbageCollection.removeLast();
           }

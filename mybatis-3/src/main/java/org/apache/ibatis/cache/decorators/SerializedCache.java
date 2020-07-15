@@ -29,6 +29,7 @@ import org.apache.ibatis.cache.CacheException;
 import org.apache.ibatis.io.Resources;
 
 /**
+ * 序列化缓存装饰器。对添加的数据序列化，取数据时反序列化
  * @author Clinton Begin
  */
 public class SerializedCache implements Cache {
@@ -52,6 +53,7 @@ public class SerializedCache implements Cache {
   @Override
   public void putObject(Object key, Object object) {
     if (object == null || object instanceof Serializable) {
+      // 放入的是序列化后的字节数组
       delegate.putObject(key, serialize((Serializable) object));
     } else {
       throw new CacheException("SharedCache failed to make a copy of a non-serializable object: " + object);
@@ -84,6 +86,9 @@ public class SerializedCache implements Cache {
     return delegate.equals(obj);
   }
 
+  /**
+   * 序列化
+   */
   private byte[] serialize(Serializable value) {
     try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
         ObjectOutputStream oos = new ObjectOutputStream(bos)) {
@@ -95,6 +100,9 @@ public class SerializedCache implements Cache {
     }
   }
 
+  /**
+   * 反序列化
+   */
   private Serializable deserialize(byte[] value) {
     Serializable result;
     try (ByteArrayInputStream bis = new ByteArrayInputStream(value);

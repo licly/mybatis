@@ -67,6 +67,7 @@ public final class MappedStatement {
   private List<ResultMap> resultMaps;
 
   /**
+   * 对应Mapper 标签的 flushCache属性，默认情况下：
    * false：MappedStatement的SQLCommandType是Select
    * true：update
    */
