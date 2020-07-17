@@ -188,6 +188,7 @@ public class Configuration {
 
   /**
    * 指定 MyBatis 所用日志的具体实现，未指定时将自动查找。
+   * 可以设置的属性值有SLF4J、COMMONS_LOGGING、LOG4J、LOG4J2、JDK_LOGGING、STDOUT_LOGGING、NO_LOGGING，或者日志实现类的完全限定名
    */
   protected Class<? extends Log> logImpl;
 
@@ -255,6 +256,10 @@ public class Configuration {
 
   protected Properties variables = new Properties();
   protected ReflectorFactory reflectorFactory = new DefaultReflectorFactory();
+
+  /**
+   * 对象工厂
+   */
   protected ObjectFactory objectFactory = new DefaultObjectFactory();
   protected ObjectWrapperFactory objectWrapperFactory = new DefaultObjectWrapperFactory();
 
@@ -429,6 +434,10 @@ public class Configuration {
     return logImpl;
   }
 
+  /**
+   * 设置日志实现
+   * @param logImpl 日志实现类
+   */
   public void setLogImpl(Class<? extends Log> logImpl) {
     if (logImpl != null) {
       this.logImpl = logImpl;

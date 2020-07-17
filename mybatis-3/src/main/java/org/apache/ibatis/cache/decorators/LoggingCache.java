@@ -20,6 +20,7 @@ import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.logging.LogFactory;
 
 /**
+ * 如果使用了二级缓存，默认会添加
  * @author Clinton Begin
  */
 public class LoggingCache implements Cache {

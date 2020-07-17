@@ -19,6 +19,7 @@ import org.apache.ibatis.cache.Cache;
 
 /**
  * 同步缓存装饰器，所有访问缓存对象的方法都是用synchronized修饰
+ * 使用了二级缓存，默认会添加
  * @author Clinton Begin
  */
 public class SynchronizedCache implements Cache {

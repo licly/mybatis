@@ -38,13 +38,34 @@ import org.apache.ibatis.reflection.SystemMetaObject;
  * @author Clinton Begin
  */
 public class CacheBuilder {
+
+  /**
+   * Mapper 命名空间id
+   */
   private final String id;
+
+  /**
+   * 缓存实现，默认为PerpetualCache
+   */
   private Class<? extends Cache> implementation;
+
+  /**
+   * 装饰器，默认为LruCache
+   */
   private final List<Class<? extends Cache>> decorators;
   private Integer size;
+  /**
+   * 如果不为null，添加ScheduleCache装饰器
+   */
   private Long clearInterval;
+  /**
+   * true：添加SerializeCache装饰器
+   */
   private boolean readWrite;
   private Properties properties;
+  /**
+   * true：添加BlockingCaching装饰器
+   */
   private boolean blocking;
 
   public CacheBuilder(String id) {
@@ -90,15 +111,19 @@ public class CacheBuilder {
   }
 
   public Cache build() {
+    // 设置默认缓存实现，PerpetualCache
     setDefaultImplementations();
+    // 创建默认缓存对象
     Cache cache = newBaseCacheInstance(implementation, id);
     setCacheProperties(cache);
     // issue #352, do not apply decorators to custom caches
     if (PerpetualCache.class.equals(cache.getClass())) {
+      // 设置默认装饰器
       for (Class<? extends Cache> decorator : decorators) {
         cache = newCacheDecoratorInstance(decorator, cache);
         setCacheProperties(cache);
       }
+      // 根据配置的缓存属性添加响应的装饰器
       cache = setStandardDecorators(cache);
     } else if (!LoggingCache.class.isAssignableFrom(cache.getClass())) {
       cache = new LoggingCache(cache);
@@ -115,19 +140,27 @@ public class CacheBuilder {
     }
   }
 
+  /**
+   * 根据配置属性添加响应装饰器
+   * @param cache
+   * @return
+   */
   private Cache setStandardDecorators(Cache cache) {
     try {
       MetaObject metaCache = SystemMetaObject.forObject(cache);
       if (size != null && metaCache.hasSetter("size")) {
         metaCache.setValue("size", size);
       }
+
       if (clearInterval != null) {
         cache = new ScheduledCache(cache);
         ((ScheduledCache) cache).setClearInterval(clearInterval);
       }
+
       if (readWrite) {
         cache = new SerializedCache(cache);
       }
+
       cache = new LoggingCache(cache);
       cache = new SynchronizedCache(cache);
       if (blocking) {
