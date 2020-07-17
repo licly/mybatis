@@ -30,6 +30,7 @@ import org.apache.ibatis.scripting.LanguageDriver;
 import org.apache.ibatis.session.Configuration;
 
 /**
+ * 用于描述通过@Select、@SelectProvider等注解配置的SQL资源信息。
  * @author Clinton Begin
  * @author Kazuki Shimizu
  */

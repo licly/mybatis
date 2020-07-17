@@ -114,11 +114,13 @@ public class MetaObject {
 
   public Object getValue(String name) {
     PropertyTokenizer prop = new PropertyTokenizer(name);
+    // prop.hasNext() == true表示当前属性是多级属性
     if (prop.hasNext()) {
       MetaObject metaValue = metaObjectForProperty(prop.getIndexedName());
       if (metaValue == SystemMetaObject.NULL_META_OBJECT) {
         return null;
       } else {
+        // 递归查找需要的属性层级
         return metaValue.getValue(prop.getChildren());
       }
     } else {
@@ -144,6 +146,11 @@ public class MetaObject {
     }
   }
 
+  /**
+   * 获取name所对应属性的metaObject属性
+   * @param name
+   * @return
+   */
   public MetaObject metaObjectForProperty(String name) {
     Object value = getValue(name);
     return MetaObject.forObject(value, objectFactory, objectWrapperFactory, reflectorFactory);

@@ -35,9 +35,27 @@ import org.apache.ibatis.session.Configuration;
  */
 public class BoundSql {
 
+  /**
+   * mybatis 解析后的SQL
+   */
   private final String sql;
+
+  /**
+   * 参数映射信息
+   */
   private final List<ParameterMapping> parameterMappings;
+
+  /**
+   * mapper参数对象
+   */
   private final Object parameterObject;
+
+  /**
+   * 额外参数信息，包括<bind>绑定的参数，内置参数
+   * Mybatis任意一个mapper都有两个内置参数，即_parameter和_databaseId
+   * _parameter代表整个参数，包括<bind>标签绑定的参数信息，这些参数存放在BoundSql对象的additionalParameters属性中
+   * _databaseId为Mapper配置中通过databaseId属性指定的数据库类型。
+   */
   private final Map<String, Object> additionalParameters;
   private final MetaObject metaParameters;
 

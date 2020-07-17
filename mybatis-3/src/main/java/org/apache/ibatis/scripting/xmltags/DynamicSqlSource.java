@@ -21,6 +21,7 @@ import org.apache.ibatis.mapping.SqlSource;
 import org.apache.ibatis.session.Configuration;
 
 /**
+ * 用于描述Mapper XML文件中配置的SQL资源信息，这些这些SQL通常含有SQL动态标签和占位符参数，需要Mapper调用时才能确定具体的语句
  * @author Clinton Begin
  */
 public class DynamicSqlSource implements SqlSource {
