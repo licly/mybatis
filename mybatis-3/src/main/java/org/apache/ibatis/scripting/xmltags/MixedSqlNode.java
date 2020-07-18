@@ -18,9 +18,13 @@ package org.apache.ibatis.scripting.xmltags;
 import java.util.List;
 
 /**
+ * 包装了一个标签下的SqlNode对象，组合模式，相当于树的非叶子节点
  * @author Clinton Begin
  */
 public class MixedSqlNode implements SqlNode {
+  /**
+   * 个标签下的SqlNode对象
+   */
   private final List<SqlNode> contents;
 
   public MixedSqlNode(List<SqlNode> contents) {

@@ -20,7 +20,14 @@ package org.apache.ibatis.scripting.xmltags;
  */
 public class IfSqlNode implements SqlNode {
   private final ExpressionEvaluator evaluator;
+  /**
+   * if 标签中的test判断条件
+   */
   private final String test;
+
+  /**
+   * if标签中的SQL内容
+   */
   private final SqlNode contents;
 
   public IfSqlNode(SqlNode contents, String test) {

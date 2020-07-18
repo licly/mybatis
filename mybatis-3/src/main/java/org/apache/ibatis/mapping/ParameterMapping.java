@@ -29,11 +29,30 @@ public class ParameterMapping {
 
   private Configuration configuration;
 
+  /**
+   * 属性名称
+   */
   private String property;
+
+  /**
+   * 参数类型，入参OR出参OR既是入参也是出参
+   */
   private ParameterMode mode;
+
+  /**
+   * 属性类型，如果Mapper中没有指定ParameterType，默认为Object
+   */
   private Class<?> javaType = Object.class;
+
+  /**
+   * 对应的JdbcType，默认为null
+   */
   private JdbcType jdbcType;
   private Integer numericScale;
+
+  /**
+   * 该类型对应的TypeHandler
+   */
   private TypeHandler<?> typeHandler;
   private String resultMapId;
   private String jdbcTypeName;

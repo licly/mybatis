@@ -23,6 +23,7 @@ import org.apache.ibatis.scripting.ScriptingException;
 import org.apache.ibatis.type.SimpleTypeRegistry;
 
 /**
+ * 如果静态文本中包含${}，使用TextSqlNode描述
  * @author Clinton Begin
  */
 public class TextSqlNode implements SqlNode {
@@ -38,8 +39,13 @@ public class TextSqlNode implements SqlNode {
     this.injectionFilter = injectionFilter;
   }
 
+  /**
+   * check是否是动态SQL
+   * @return
+   */
   public boolean isDynamic() {
     DynamicCheckerTokenParser checker = new DynamicCheckerTokenParser();
+    // 创建解析${}的通用解析器对象
     GenericTokenParser parser = createParser(checker);
     parser.parse(text);
     return checker.isDynamic();
@@ -89,6 +95,9 @@ public class TextSqlNode implements SqlNode {
 
   private static class DynamicCheckerTokenParser implements TokenHandler {
 
+    /**
+     * 是否是动态SQL
+     */
     private boolean isDynamic;
 
     public DynamicCheckerTokenParser() {

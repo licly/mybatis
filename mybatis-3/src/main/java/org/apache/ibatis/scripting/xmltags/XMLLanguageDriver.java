@@ -29,6 +29,7 @@ import org.apache.ibatis.scripting.defaults.RawSqlSource;
 import org.apache.ibatis.session.Configuration;
 
 /**
+ * XML语言驱动，负责解析XML动态SQL
  * @author Eduardo Macarron
  */
 public class XMLLanguageDriver implements LanguageDriver {
@@ -38,20 +39,37 @@ public class XMLLanguageDriver implements LanguageDriver {
     return new DefaultParameterHandler(mappedStatement, parameterObject, boundSql);
   }
 
+  /**
+   * 解析XML文件配置的SQL信息
+   * @param configuration The MyBatis configuration
+   * @param script XNode parsed from a XML file
+   * @param parameterType input parameter type got from a mapper method or specified in the parameterType xml attribute. Can be null.
+   * @return
+   */
   @Override
   public SqlSource createSqlSource(Configuration configuration, XNode script, Class<?> parameterType) {
     XMLScriptBuilder builder = new XMLScriptBuilder(configuration, script, parameterType);
+    // 解析SQL
     return builder.parseScriptNode();
   }
 
+  /**
+   * 解析java注解配置的SQL信息.注解也可以使用XML格式字符串
+   * @param configuration The MyBatis configuration
+   * @param script The content of the annotation
+   * @param parameterType input parameter type got from a mapper method or specified in the parameterType xml attribute. Can be null.
+   * @return
+   */
   @Override
   public SqlSource createSqlSource(Configuration configuration, String script, Class<?> parameterType) {
     // issue #3
+    // 若字符串以<script>开头，则以XML方式解析
     if (script.startsWith("<script>")) {
       XPathParser parser = new XPathParser(script, false, configuration.getVariables(), new XMLMapperEntityResolver());
       return createSqlSource(configuration, parser.evalNode("/script"), parameterType);
     } else {
       // issue #127
+      // 如果参数中包含${}占位符，返回DynamicSqlSource
       script = PropertyParser.parse(script, configuration.getVariables());
       TextSqlNode textSqlNode = new TextSqlNode(script);
       if (textSqlNode.isDynamic()) {

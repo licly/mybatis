@@ -28,13 +28,26 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 /**
+ * XML Node包装
  * @author Clinton Begin
  */
 public class XNode {
 
+  /**
+   * 真实XML Node对象
+   */
   private final Node node;
+  /**
+   * 节点标签名
+   */
   private final String name;
+  /**
+   * 节点静态内容，不包括节点标签和子标签
+   */
   private final String body;
+  /**
+   * 节点标签的属性集合
+   */
   private final Properties attributes;
   private final Properties variables;
   private final XPathParser xpathParser;

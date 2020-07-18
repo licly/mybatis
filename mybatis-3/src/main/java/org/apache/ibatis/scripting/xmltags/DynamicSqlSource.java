@@ -21,12 +21,16 @@ import org.apache.ibatis.mapping.SqlSource;
 import org.apache.ibatis.session.Configuration;
 
 /**
- * 用于描述Mapper XML文件中配置的SQL资源信息，这些这些SQL通常含有SQL动态标签和占位符参数，需要Mapper调用时才能确定具体的语句
+ * 用于描述Mapper XML文件中配置的SQL资源信息，这些这些SQL通常含有SQL动态标签和${}占位符参数，需要Mapper调用时才能确定具体的语句
  * @author Clinton Begin
  */
 public class DynamicSqlSource implements SqlSource {
 
   private final Configuration configuration;
+
+  /**
+   * 一个SQL标签树的根节点
+   */
   private final SqlNode rootSqlNode;
 
   public DynamicSqlSource(Configuration configuration, SqlNode rootSqlNode) {
@@ -34,9 +38,15 @@ public class DynamicSqlSource implements SqlSource {
     this.rootSqlNode = rootSqlNode;
   }
 
+  /**
+   * 获取绑定的BoundSql对象
+   * @param parameterObject
+   * @return
+   */
   @Override
   public BoundSql getBoundSql(Object parameterObject) {
     DynamicContext context = new DynamicContext(configuration, parameterObject);
+    // 解析SQL树
     rootSqlNode.apply(context);
     SqlSourceBuilder sqlSourceParser = new SqlSourceBuilder(configuration);
     Class<?> parameterType = parameterObject == null ? Object.class : parameterObject.getClass();

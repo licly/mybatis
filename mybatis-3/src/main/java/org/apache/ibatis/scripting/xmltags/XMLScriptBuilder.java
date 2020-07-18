@@ -37,6 +37,12 @@ public class XMLScriptBuilder extends BaseBuilder {
   private final XNode context;
   private boolean isDynamic;
   private final Class<?> parameterType;
+
+  /**
+   * 存放各种节点对应的Handler，比如
+   * if -> IfHandler
+   * foreach -> ForeachHandler 等
+   */
   private final Map<String, NodeHandler> nodeHandlerMap = new HashMap<>();
 
   public XMLScriptBuilder(Configuration configuration, XNode context) {
@@ -63,9 +69,14 @@ public class XMLScriptBuilder extends BaseBuilder {
     nodeHandlerMap.put("bind", new BindHandler());
   }
 
+  /**
+   * 解析标签为SqlSource
+   * @return 对应的SqlSource对象
+   */
   public SqlSource parseScriptNode() {
     MixedSqlNode rootSqlNode = parseDynamicTags(context);
     SqlSource sqlSource;
+    // 如果是动态SQL，返回DynamicSqlSource，否则返回RawSqlSource
     if (isDynamic) {
       sqlSource = new DynamicSqlSource(configuration, rootSqlNode);
     } else {
@@ -74,14 +85,27 @@ public class XMLScriptBuilder extends BaseBuilder {
     return sqlSource;
   }
 
+  /**
+   * 解析SQL标签
+   * @param node
+   * @return
+   */
   protected MixedSqlNode parseDynamicTags(XNode node) {
+    // 存储当前标签下的SqlNode
     List<SqlNode> contents = new ArrayList<>();
+    // 获取当前标签的子标签
     NodeList children = node.getNode().getChildNodes();
+    // 遍历所有子节点
     for (int i = 0; i < children.getLength(); i++) {
+      // 用XNode包装子节点
       XNode child = node.newXNode(children.item(i));
+      // 子节点是文本节点和CDATA节点，XML解析器不会解析CDATA节点包括起来的内容（<![CDATA[" 开始，由 "]]>）
       if (child.getNode().getNodeType() == Node.CDATA_SECTION_NODE || child.getNode().getNodeType() == Node.TEXT_NODE) {
+        // 获取XNode body文本内容，传空串为了不让返回null
         String data = child.getStringBody("");
+        // 创建文本SQL节点
         TextSqlNode textSqlNode = new TextSqlNode(data);
+        // check是否是动态SQL
         if (textSqlNode.isDynamic()) {
           contents.add(textSqlNode);
           isDynamic = true;
@@ -89,12 +113,16 @@ public class XMLScriptBuilder extends BaseBuilder {
           contents.add(new StaticTextSqlNode(data));
         }
       } else if (child.getNode().getNodeType() == Node.ELEMENT_NODE) { // issue #628
+        // 子节点是标签节点
+        // 获取子标签名称
         String nodeName = child.getNode().getNodeName();
+        // 获取该标签对应的handler
         NodeHandler handler = nodeHandlerMap.get(nodeName);
         if (handler == null) {
           throw new BuilderException("Unknown element <" + nodeName + "> in SQL statement.");
         }
         handler.handleNode(child, contents);
+        // 只要涉及到子标签的都是需要运行时才知道具体SQL的，所以标记为动态SQL
         isDynamic = true;
       }
     }
@@ -102,6 +130,11 @@ public class XMLScriptBuilder extends BaseBuilder {
   }
 
   private interface NodeHandler {
+    /**
+     * 解析标签，创建对应的SqlNode，添加到标签集合
+     * @param nodeToHandle 要解析的标签
+     * @param targetContents 标签集合，存储该标签下所有的SqlNode
+     */
     void handleNode(XNode nodeToHandle, List<SqlNode> targetContents);
   }
 
@@ -126,11 +159,14 @@ public class XMLScriptBuilder extends BaseBuilder {
 
     @Override
     public void handleNode(XNode nodeToHandle, List<SqlNode> targetContents) {
+      // 递归解析子标签
       MixedSqlNode mixedSqlNode = parseDynamicTags(nodeToHandle);
+      // 获取属性
       String prefix = nodeToHandle.getStringAttribute("prefix");
       String prefixOverrides = nodeToHandle.getStringAttribute("prefixOverrides");
       String suffix = nodeToHandle.getStringAttribute("suffix");
       String suffixOverrides = nodeToHandle.getStringAttribute("suffixOverrides");
+      // 创建TrimSqlNode并添加到标签集合
       TrimSqlNode trim = new TrimSqlNode(configuration, mixedSqlNode, prefix, prefixOverrides, suffix, suffixOverrides);
       targetContents.add(trim);
     }
@@ -186,9 +222,16 @@ public class XMLScriptBuilder extends BaseBuilder {
       // Prevent Synthetic Access
     }
 
+    /**
+     *
+     * @param nodeToHandle 当前标签
+     * @param targetContents 存储该标签下所有SqlNode的集合
+     */
     @Override
     public void handleNode(XNode nodeToHandle, List<SqlNode> targetContents) {
+      // 递归处理标签内容
       MixedSqlNode mixedSqlNode = parseDynamicTags(nodeToHandle);
+      // 取出test条件，创建IfSqlNode添加到SqlNode集合
       String test = nodeToHandle.getStringAttribute("test");
       IfSqlNode ifSqlNode = new IfSqlNode(mixedSqlNode, test);
       targetContents.add(ifSqlNode);

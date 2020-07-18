@@ -16,11 +16,18 @@
 package org.apache.ibatis.scripting.xmltags;
 
 /**
+ * 描述<bind>标签，<bind name="nameLike" value="'%' + userName + '%'"/>
  * @author Frank D. Martinez [mnesarco]
  */
 public class VarDeclSqlNode implements SqlNode {
 
+  /**
+   * name属性值
+   */
   private final String name;
+  /**
+   * value属性值
+   */
   private final String expression;
 
   public VarDeclSqlNode(String var, String exp) {

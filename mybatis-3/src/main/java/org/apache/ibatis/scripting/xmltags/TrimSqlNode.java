@@ -25,14 +25,38 @@ import java.util.StringTokenizer;
 import org.apache.ibatis.session.Configuration;
 
 /**
+ * trim标签
+ * <trim prefix="WHERE" prefixOverrides="AND">
+ * 	<if test="state != null">
+ * 	  state = #{state}
+ * 	</if>
+ * 	<if test="title != null">
+ * 	  AND title like #{title}
+ * 	</if>
+ * 	<if test="author != null and author.name != null">
+ * 	  AND author_name like #{author.name}
+ * 	</if>
+ * </trim>
  * @author Clinton Begin
  */
 public class TrimSqlNode implements SqlNode {
 
   private final SqlNode contents;
+  /**
+   * prefix属性值，要添加的前缀
+   */
   private final String prefix;
+  /**
+   * suffix属性值，添加这个后缀
+   */
   private final String suffix;
+  /**
+   * prefixOverrides属性值，表示要去除的前缀
+   */
   private final List<String> prefixesToOverride;
+  /**
+   * suffixOverrides属性值，表示要去除的后缀
+   */
   private final List<String> suffixesToOverride;
   private final Configuration configuration;
 
