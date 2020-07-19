@@ -32,6 +32,9 @@ import org.apache.ibatis.session.Configuration;
  */
 public class DynamicContext {
 
+  /**
+   * 映射mapper参数
+   */
   public static final String PARAMETER_OBJECT_KEY = "_parameter";
   public static final String DATABASE_ID_KEY = "_databaseId";
 
@@ -39,13 +42,25 @@ public class DynamicContext {
     OgnlRuntime.setPropertyAccessor(ContextMap.class, new ContextAccessor());
   }
 
+  /**
+   * 存放运行时绑定的参数
+   * 会额外绑定_parameter和_databaseId
+   */
   private final ContextMap bindings;
+
+  /**
+   * 存放拼接好的SQL
+   * StringJoiner是JDK 1.8提供的一个拼接字符串的工具类，可以选择拼接字符串的prefix、suffix、delimiter，
+   * 这里delimiter是' '，因为SQL语句是用空格分隔的
+   */
   private final StringJoiner sqlBuilder = new StringJoiner(" ");
+
   private int uniqueNumber = 0;
 
   public DynamicContext(Configuration configuration, Object parameterObject) {
     if (parameterObject != null && !(parameterObject instanceof Map)) {
       MetaObject metaObject = configuration.newMetaObject(parameterObject);
+      // 是否有对应类型的TypeHandler
       boolean existsTypeHandler = configuration.getTypeHandlerRegistry().hasTypeHandler(parameterObject.getClass());
       bindings = new ContextMap(metaObject, existsTypeHandler);
     } else {

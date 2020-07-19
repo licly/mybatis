@@ -54,6 +54,10 @@ public class ParameterMapping {
    * 该类型对应的TypeHandler
    */
   private TypeHandler<?> typeHandler;
+
+  /**
+   *
+   */
   private String resultMapId;
   private String jdbcTypeName;
   private String expression;

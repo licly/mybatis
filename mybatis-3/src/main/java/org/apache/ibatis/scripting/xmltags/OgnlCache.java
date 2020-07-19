@@ -49,6 +49,12 @@ public final class OgnlCache {
     }
   }
 
+  /**
+   * 解析并缓存ognl表达式节点
+   * @param expression
+   * @return
+   * @throws OgnlException
+   */
   private static Object parseExpression(String expression) throws OgnlException {
     Object node = expressionCache.get(expression);
     if (node == null) {

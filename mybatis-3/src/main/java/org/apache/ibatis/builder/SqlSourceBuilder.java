@@ -82,38 +82,60 @@ public class SqlSourceBuilder extends BaseBuilder {
       return parameterMappings;
     }
 
+    /**
+     * 把#{}替换成？
+     * @param content #{}里的字符串
+     * @return
+     */
     @Override
     public String handleToken(String content) {
       parameterMappings.add(buildParameterMapping(content));
       return "?";
     }
 
+    /**
+     * 把#{}里面的内容替换成ParameterMapping对象
+     * @param content #{}占位符名称
+     * @return
+     */
     private ParameterMapping buildParameterMapping(String content) {
+      // 把占位符名称转为Map对象
       Map<String, String> propertiesMap = parseParameterMapping(content);
+      // property是占位符名称
       String property = propertiesMap.get("property");
+      // 参数类型
       Class<?> propertyType;
+
+      // 如果内置参数或者<bind>标签绑定的参数包含该属性，则参数类型为getter方法返回值类型
       if (metaParameters.hasGetter(property)) { // issue #448 get type from additional params
         propertyType = metaParameters.getGetterType(property);
+        // 如果注册了TypeHandler，使用参数类型
       } else if (typeHandlerRegistry.hasTypeHandler(parameterType)) {
         propertyType = parameterType;
       } else if (JdbcType.CURSOR.name().equals(propertiesMap.get("jdbcType"))) {
+        // 如果指定了jdbcType，并且为Cursor类型，则使用ResultSet类型
         propertyType = java.sql.ResultSet.class;
       } else if (property == null || Map.class.isAssignableFrom(parameterType)) {
+        // 如果是Map的子类型，使用Object
         propertyType = Object.class;
       } else {
+        // 获取ParameterType对应的MetaClass对象，
         MetaClass metaClass = MetaClass.forClass(parameterType, configuration.getReflectorFactory());
+        // 如果有属性对应的getter方法，使用getter方法返回类型，否则使用Object类型
         if (metaClass.hasGetter(property)) {
           propertyType = metaClass.getGetterType(property);
         } else {
           propertyType = Object.class;
         }
       }
+
       ParameterMapping.Builder builder = new ParameterMapping.Builder(configuration, property, propertyType);
       Class<?> javaType = propertyType;
       String typeHandlerAlias = null;
       for (Map.Entry<String, String> entry : propertiesMap.entrySet()) {
         String name = entry.getKey();
         String value = entry.getValue();
+        // 指定ParameterMapping对象属性
         if ("javaType".equals(name)) {
           javaType = resolveClass(value);
           builder.javaType(javaType);
@@ -143,6 +165,17 @@ public class SqlSourceBuilder extends BaseBuilder {
       return builder.build();
     }
 
+    /**
+     * 把参数占位符内容转为Map对象。例如参数占位符内容如下：
+     * #{userId,javaType=long,jdbcType=NUMERIC,typeHandler=MyTypeHandler}
+     * 会转成如下Map：
+     * Map<String, String> map = new HashMap<String, String>();
+     * map.put("property", "userId");
+     * map.put("javaType", "long");
+     * map.put("jdbcType", "NUMERIC");
+     * map.put("typeHandler", "MyTypeHandler");
+     *
+     */
     private Map<String, String> parseParameterMapping(String content) {
       try {
         return new ParameterExpression(content);

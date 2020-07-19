@@ -36,6 +36,10 @@ public final class MappedStatement {
 
   private String resource;
   private Configuration configuration;
+
+  /**
+   * 在命名空间中唯一的标识符，可以被用来引用这条语句。
+   */
   private String id;
   private Integer fetchSize;
   private Integer timeout;
@@ -63,6 +67,10 @@ public final class MappedStatement {
    * 二级缓存实例
    */
   private Cache cache;
+
+  /**
+   * 用于引用外部 parameterMap 的属性，目前已被废弃。请使用行内参数映射和 parameterType 属性。
+   */
   private ParameterMap parameterMap;
   private List<ResultMap> resultMaps;
 
@@ -70,11 +78,13 @@ public final class MappedStatement {
    * 对应Mapper 标签的 flushCache属性，默认情况下：
    * false：MappedStatement的SQLCommandType是Select
    * true：update
+   * 将其设置为 true 后，只要语句被调用，都会导致本地缓存和二级缓存被清空，默认值：false。
    */
   private boolean flushCacheRequired;
 
   /**
    * 是否使用二级缓存
+   * 将其设置为 true 后，将会导致本条语句的结果被二级缓存缓存起来，默认值：对 select 元素为 true。
    */
   private boolean useCache;
 
@@ -353,9 +363,9 @@ public final class MappedStatement {
   }
 
   /**
-   * Gets the resul sets.
+   * Gets the result sets.
    *
-   * @return the resul sets
+   * @return the result sets
    * @deprecated Use {@link #getResultSets()}
    */
   @Deprecated

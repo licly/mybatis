@@ -78,8 +78,11 @@ public class TextSqlNode implements SqlNode {
       if (parameter == null) {
         context.getBindings().put("value", null);
       } else if (SimpleTypeRegistry.isSimpleType(parameter.getClass())) {
+        // 将对象参数添加到ContextMap
         context.getBindings().put("value", parameter);
       }
+
+      // 获取要传入的参数值，然后返回替换${}
       Object value = OgnlCache.getValue(content, context.getBindings());
       String srtValue = value == null ? "" : String.valueOf(value); // issue #274 return "" instead of "null"
       checkInjection(srtValue);
@@ -93,6 +96,9 @@ public class TextSqlNode implements SqlNode {
     }
   }
 
+  /**
+   * 标记SQL字符串是否含有${},有的话就是动态SQL
+   */
   private static class DynamicCheckerTokenParser implements TokenHandler {
 
     /**
