@@ -18,7 +18,7 @@ package org.apache.ibatis.reflection.property;
 import java.util.Iterator;
 
 /**
- * 属性分词器，Mapper文件中，入参是对象的情况下，层级属性定义方式为：一级属性.二级属性.三级属性……
+ * 属性解析器，Mapper文件中，入参是对象的情况下，层级属性定义方式为：一级属性.二级属性.三级属性……
  * 比如入参为"user":{"name","licly","age":20}
  *
  * 针对子属性，实现迭代器模式

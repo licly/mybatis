@@ -18,6 +18,12 @@ package org.apache.ibatis.logging;
 import java.lang.reflect.Constructor;
 
 /**
+ * Log日志体系使用对象适配器模式，通过在适配器类组合具体日志实现对象实现适配
+ * 在这种LogFactory的接口和适配器对象接口大多相同的情况下，一般使用类适配器模式会更好，可以减少代码量。
+ * 但是这里由于LogFactory定义的接口远少于目标适配类，如果使用类适配模式继承目标适配类的话，
+ * 无形之中会开放很多接口，并不符合LogFactory定义。如果把继承目标适配类的方法都重写为私有，
+ * 这样又增加了代码量，完全违背了使用类适配模式的优点。
+ * 所以这里使用了对象适配器模式
  * @author Clinton Begin
  * @author Eduardo Macarron
  */
