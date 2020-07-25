@@ -49,15 +49,15 @@ public class TypeParameterResolver {
   /**
    * Resolve return type.
    *
-   * @param method
-   *          the method
-   * @param srcType
-   *          the src type
+   * @param method the method
+   * @param srcType the src type 当前代理类所代理的class
    * @return The return type of the method as {@link Type}. If it has type parameters in the declaration,<br>
    *         they will be resolved to the actual runtime {@link Type}s.
    */
   public static Type resolveReturnType(Method method, Type srcType) {
+    // 获取方法带泛型的返回值类型
     Type returnType = method.getGenericReturnType();
+    // 获取声明方法的class
     Class<?> declaringClass = method.getDeclaringClass();
     return resolveType(returnType, srcType, declaringClass);
   }
@@ -85,10 +85,13 @@ public class TypeParameterResolver {
 
   private static Type resolveType(Type type, Type srcType, Class<?> declaringClass) {
     if (type instanceof TypeVariable) {
+      // 泛型类型参数，比如T、E等
       return resolveTypeVar((TypeVariable<?>) type, srcType, declaringClass);
     } else if (type instanceof ParameterizedType) {
+      // 泛型参数，比如List<Xxx>
       return resolveParameterizedType((ParameterizedType) type, srcType, declaringClass);
     } else if (type instanceof GenericArrayType) {
+      // 泛型数组，比如T[]
       return resolveGenericArrayType((GenericArrayType) type, srcType, declaringClass);
     } else {
       return type;
@@ -152,6 +155,9 @@ public class TypeParameterResolver {
     return result;
   }
 
+  /**
+   * 解析类型参数
+   */
   private static Type resolveTypeVar(TypeVariable<?> typeVar, Type srcType, Class<?> declaringClass) {
     Type result;
     Class<?> clazz;
@@ -159,6 +165,7 @@ public class TypeParameterResolver {
       clazz = (Class<?>) srcType;
     } else if (srcType instanceof ParameterizedType) {
       ParameterizedType parameterizedType = (ParameterizedType) srcType;
+      // 获取参数的原始类型，比如List<String> 的原始类型是List
       clazz = (Class<?>) parameterizedType.getRawType();
     } else {
       throw new IllegalArgumentException("The 2nd arg must be Class or ParameterizedType, but was: " + srcType.getClass());

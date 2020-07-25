@@ -16,6 +16,8 @@
 package org.apache.ibatis.mapping;
 
 /**
+ * <collection>和<association>标签提供了一个fetchType属性，用于控制级联查询的加载行为，
+ * fetchType属性值为lazy时表示该级联查询采用懒加载方式，当fetchType属性值为eager时表示该级联查询采用积极加载方式。
  * @author Eduardo Macarron
  */
 public enum FetchType {

@@ -101,8 +101,11 @@ public class XMLMapperBuilder extends BaseBuilder {
       bindMapperForNamespace();
     }
 
+    // 继续解析之前出现的ResultMap对象
     parsePendingResultMaps();
+    // 继续解析之前出现的CacheRef对象
     parsePendingCacheRefs();
+    // 继续解析之前出现的select/insert/update/delete对象
     parsePendingStatements();
   }
 
@@ -267,6 +270,7 @@ public class XMLMapperBuilder extends BaseBuilder {
   }
 
   private void resultMapElements(List<XNode> list) {
+    // 解析每个<resultMap>标签
     for (XNode resultMapNode : list) {
       try {
         resultMapElement(resultMapNode);
@@ -282,6 +286,7 @@ public class XMLMapperBuilder extends BaseBuilder {
 
   private ResultMap resultMapElement(XNode resultMapNode, List<ResultMapping> additionalResultMappings, Class<?> enclosingType) {
     ErrorContext.instance().activity("processing " + resultMapNode.getValueBasedIdentifier());
+
     String type = resultMapNode.getStringAttribute("type",
         resultMapNode.getStringAttribute("ofType",
             resultMapNode.getStringAttribute("resultType",

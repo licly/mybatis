@@ -37,17 +37,42 @@ import org.apache.ibatis.session.Configuration;
 public class ResultMap {
   private Configuration configuration;
 
+  // resultMap标签的id属性
   private String id;
+
+  // resultMap标签的type属性
   private Class<?> type;
+
+  // 通过<result>标签配置的所有数据库字段与Java实体属性之间的映射信息。
   private List<ResultMapping> resultMappings;
+
+  // 通过<id>标签配置的数据库主键与Java实体属性的映射信息。需要注意的是，<id>标签与<result>标签没有本质的区别。
   private List<ResultMapping> idResultMappings;
+
+  // 通过<constructor>标签配置的构造器映射信息。
   private List<ResultMapping> constructorResultMappings;
+
+  // 通过<result>标签配置的数据库字段与Java实体属性的映射信息。
   private List<ResultMapping> propertyResultMappings;
+
+  // 该属性存放所有映射的数据库字段。当使用columnPrefix属性配置了前缀时，MyBatis会对mappedColumns属性进行遍历，为所有数据库字段追加columnPrefix属性配置的前缀。
   private Set<String> mappedColumns;
+
+  // 该属性存放所有映射的Java实体属性信息。
   private Set<String> mappedProperties;
+
+  // 该属性为在<resultMap>标签中通过<discriminator>标签配置的鉴别器信息。
   private Discriminator discriminator;
+
+  // 该属性用于标识是否有嵌套的ResultMap，当使用<association>或<collection>标签以JOIN查询方式配置一对一或一对多级联映射时，
+  // <association>或<collection>标签相当于一个嵌套的ResultMap，因此hasNestedResultMaps属性值为true。
   private boolean hasNestedResultMaps;
+
+  // 该属性用于标识是否有嵌套的查询，当使用<association>或<collection>标签关联一个外部的查询Mapper建立一对一或一对多级联映射时，
+  // hasNestedQueries属性值为true。
   private boolean hasNestedQueries;
+
+  // autoMapping属性为true，表示开启自动映射，即使未使用<result>或<id>标签配置映射字段，MyBatis也会自动对这些字段进行映射。
   private Boolean autoMapping;
 
   private ResultMap() {

@@ -72,6 +72,10 @@ public final class MappedStatement {
    * 用于引用外部 parameterMap 的属性，目前已被废弃。请使用行内参数映射和 parameterType 属性。
    */
   private ParameterMap parameterMap;
+
+  /**
+   * mapper resultMap引用的结果映射
+   */
   private List<ResultMap> resultMaps;
 
   /**
@@ -106,6 +110,7 @@ public final class MappedStatement {
    * 用于将数据库自增主键或者<insert>标签中<selectKey>标签返回的值填充到实体的属性中，如果有多个属性，则使用逗号分隔。
    */
   private String[] keyProperties;
+
   private String[] keyColumns;
 
   /**
@@ -141,7 +146,9 @@ public final class MappedStatement {
       mappedStatement.parameterMap = new ParameterMap.Builder(configuration, "defaultParameterMap", null, new ArrayList<>()).build();
       mappedStatement.resultMaps = new ArrayList<>();
       mappedStatement.sqlCommandType = sqlCommandType;
-      mappedStatement.keyGenerator = configuration.isUseGeneratedKeys() && SqlCommandType.INSERT.equals(sqlCommandType) ? Jdbc3KeyGenerator.INSTANCE : NoKeyGenerator.INSTANCE;
+      mappedStatement.keyGenerator =
+        configuration.isUseGeneratedKeys() && SqlCommandType.INSERT.equals(sqlCommandType)
+          ? Jdbc3KeyGenerator.INSTANCE : NoKeyGenerator.INSTANCE;
       String logId = id;
       if (configuration.getLogPrefix() != null) {
         logId = configuration.getLogPrefix() + id;
