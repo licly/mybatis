@@ -50,7 +50,7 @@ public class TypeParameterResolver {
    * Resolve return type.
    *
    * @param method the method
-   * @param srcType the src type 当前代理类所代理的class
+   * @param srcType the src type
    * @return The return type of the method as {@link Type}. If it has type parameters in the declaration,<br>
    *         they will be resolved to the actual runtime {@link Type}s.
    */
@@ -179,7 +179,6 @@ public class TypeParameterResolver {
       clazz = (Class<?>) srcType;
     } else if (srcType instanceof ParameterizedType) {
       ParameterizedType parameterizedType = (ParameterizedType) srcType;
-      // 获取参数的原始类型，比如List<String> 的原始类型是List
       clazz = (Class<?>) parameterizedType.getRawType();
     } else {
       throw new IllegalArgumentException("The 2nd arg must be Class or ParameterizedType, but was: " + srcType.getClass());
