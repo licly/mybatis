@@ -40,7 +40,14 @@ import org.apache.ibatis.reflection.ArrayUtil;
  */
 public abstract class BaseJdbcLogger {
 
+  /**
+   * 存放PreparedStatement所有的参数大于1个的set方法
+   */
   protected static final Set<String> SET_METHODS;
+
+  /**
+   * 存放
+   */
   protected static final Set<String> EXECUTE_METHODS = new HashSet<>();
 
   private final Map<Object, Object> columnMap = new HashMap<>();
@@ -51,9 +58,6 @@ public abstract class BaseJdbcLogger {
   protected final Log statementLog;
   protected final int queryStack;
 
-  /*
-   * Default constructor
-   */
   public BaseJdbcLogger(Log log, int queryStack) {
     this.statementLog = log;
     if (queryStack == 0) {
@@ -64,11 +68,11 @@ public abstract class BaseJdbcLogger {
   }
 
   static {
-    SET_METHODS = Arrays.stream(PreparedStatement.class.getDeclaredMethods())
-            .filter(method -> method.getName().startsWith("set"))
-            .filter(method -> method.getParameterCount() > 1)
-            .map(Method::getName)
-            .collect(Collectors.toSet());
+    SET_METHODS = Arrays.stream(PreparedStatement.class.getDeclaredMethods()) // PreparedStatement类声明的所有方法
+            .filter(method -> method.getName().startsWith("set")) // 过滤set方法
+            .filter(method -> method.getParameterCount() > 1) // 形参个数>1
+            .map(Method::getName) // 获取方法名称
+            .collect(Collectors.toSet()); // 收集到一个set中
 
     EXECUTE_METHODS.add("execute");
     EXECUTE_METHODS.add("executeUpdate");
@@ -132,12 +136,22 @@ public abstract class BaseJdbcLogger {
     return statementLog.isTraceEnabled();
   }
 
+  /**
+   * 输出debug日志
+   * @param text 日志内容
+   * @param input 标记输入还是输出，即数据来自客户端还是数据库，客户端是输入，数据库是输出
+   */
   protected void debug(String text, boolean input) {
     if (statementLog.isDebugEnabled()) {
       statementLog.debug(prefix(input) + text);
     }
   }
 
+  /**
+   * 输出trace日志
+   * @param text
+   * @param input
+   */
   protected void trace(String text, boolean input) {
     if (statementLog.isTraceEnabled()) {
       statementLog.trace(prefix(input) + text);

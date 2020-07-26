@@ -137,8 +137,8 @@ public class Configuration {
   protected boolean mapUnderscoreToCamelCase;
 
   /**
-   * 开启时，任一方法的调用都会加载该对象的所有延迟加载属性。
-   * 否则，每个延迟加载属性会按需加载（参考 lazyLoadTriggerMethods)。
+   * true，任一方法的调用都会加载该对象的所有延迟加载属性，即积极加载
+   * false，每个延迟加载属性会按需加载（参考 lazyLoadTriggerMethods)，即懒加载
    */
   protected boolean aggressiveLazyLoading;
 
@@ -264,7 +264,8 @@ public class Configuration {
   protected ObjectWrapperFactory objectWrapperFactory = new DefaultObjectWrapperFactory();
 
   /**
-   * 延迟加载的全局开关。当开启时，所有关联对象都会延迟加载。 特定关联关系中可通过设置 fetchType 属性来覆盖该项的开关状态。
+   * 延迟加载的全局开关。当开启时，所有级联映射 关联对象都会延迟加载。
+   * 特定关联关系中可通过设置 fetchType 属性来覆盖该项的开关状态。
    */
   protected boolean lazyLoadingEnabled = false;
 

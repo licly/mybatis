@@ -241,7 +241,9 @@ public class MapperMethod {
    */
   public static class SqlCommand {
 
+    // mapper id: namespace + 方法名
     private final String name;
+    // SQL类型:UNKNOWN, INSERT, UPDATE, DELETE, SELECT, FLUSH
     private final SqlCommandType type;
 
     public SqlCommand(Configuration configuration, Class<?> mapperInterface, Method method) {
@@ -307,7 +309,7 @@ public class MapperMethod {
   }
 
   /**
-   * 获取方法的签名信息，比如Mapper方法的参数名、参数注解等信息
+   * 方法的签名信息，比如Mapper方法的参数名、参数注解等信息
    */
   public static class MethodSignature {
 
@@ -330,6 +332,12 @@ public class MapperMethod {
     private final Integer rowBoundsIndex;
     private final ParamNameResolver paramNameResolver;
 
+    /**
+     *
+     * @param configuration
+     * @param mapperInterface 当前代理类所代理的接口
+     * @param method 拦截到的方法
+     */
     public MethodSignature(Configuration configuration, Class<?> mapperInterface, Method method) {
       // 获取Mapper方法的返回值类型
       Type resolvedReturnType = TypeParameterResolver.resolveReturnType(method, mapperInterface);

@@ -26,6 +26,7 @@ import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.reflection.ExceptionUtil;
 
 /**
+ * 增加了日志功能的Connection代理类
  * Connection proxy to add logging.
  *
  * @author Clinton Begin
@@ -45,20 +46,30 @@ public final class ConnectionLogger extends BaseJdbcLogger implements Invocation
   public Object invoke(Object proxy, Method method, Object[] params)
       throws Throwable {
     try {
+      // Object方法不拦截
       if (Object.class.equals(method.getDeclaringClass())) {
         return method.invoke(this, params);
       }
+
+      // prepareCall和prepareStatement方法，输出日志
       if ("prepareStatement".equals(method.getName()) || "prepareCall".equals(method.getName())) {
         if (isDebugEnabled()) {
           debug(" Preparing: " + removeExtraWhitespace((String) params[0]), true);
         }
+
+        // 创建PreparedStatement对象
         PreparedStatement stmt = (PreparedStatement) method.invoke(connection, params);
+        // 进行代理
         stmt = PreparedStatementLogger.newInstance(stmt, statementLog, queryStack);
         return stmt;
+
+        // createStatement方法，创建Statement对象
       } else if ("createStatement".equals(method.getName())) {
         Statement stmt = (Statement) method.invoke(connection, params);
+        // 进行代理
         stmt = StatementLogger.newInstance(stmt, statementLog, queryStack);
         return stmt;
+
       } else {
         return method.invoke(connection, params);
       }
@@ -70,12 +81,9 @@ public final class ConnectionLogger extends BaseJdbcLogger implements Invocation
   /**
    * Creates a logging version of a connection.
    *
-   * @param conn
-   *          the original connection
-   * @param statementLog
-   *          the statement log
-   * @param queryStack
-   *          the query stack
+   * @param conn the original connection
+   * @param statementLog the statement log
+   * @param queryStack the query stack
    * @return the connection with logging
    */
   public static Connection newInstance(Connection conn, Log statementLog, int queryStack) {

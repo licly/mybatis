@@ -31,6 +31,7 @@ public class StatementUtil {
   }
 
   /**
+   * 如果transactionTimeout小于queryTimeout，使用transactionTimeout
    * Apply a transaction timeout.
    * <p>
    * Update a query timeout to apply a transaction timeout.

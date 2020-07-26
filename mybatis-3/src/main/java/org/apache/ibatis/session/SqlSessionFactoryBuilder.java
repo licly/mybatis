@@ -26,7 +26,8 @@ import org.apache.ibatis.executor.ErrorContext;
 import org.apache.ibatis.session.defaults.DefaultSqlSessionFactory;
 
 /**
- * Builds {@link SqlSession} instances.
+ * 个人理解，这里根本就没有用建造者模式，完全是为了实现功能提供了几个重叠方法，最后创建SqlSessionFactory对象
+ * Builds {@link SqlSessionFactory} instances.
  *
  * @author Clinton Begin
  */
@@ -88,6 +89,11 @@ public class SqlSessionFactoryBuilder {
     }
   }
 
+  /**
+   * 创建SqlSessionFactory对象
+   * @param config
+   * @return
+   */
   public SqlSessionFactory build(Configuration config) {
     return new DefaultSqlSessionFactory(config);
   }

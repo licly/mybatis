@@ -25,7 +25,15 @@ public class ErrorContext {
 
   private ErrorContext stored;
   private String resource;
+
+  /**
+   * 执行的动作
+   */
   private String activity;
+
+  /**
+   * 指定的MappedStatement id
+   */
   private String object;
   private String message;
   private String sql;

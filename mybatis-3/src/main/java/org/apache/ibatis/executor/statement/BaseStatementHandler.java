@@ -59,7 +59,8 @@ public abstract class BaseStatementHandler implements StatementHandler {
     this.typeHandlerRegistry = configuration.getTypeHandlerRegistry();
     this.objectFactory = configuration.getObjectFactory();
 
-    if (boundSql == null) { // issue #435, get the key before calculating the statement
+    // issue #435, get the key before calculating the statement
+    if (boundSql == null) {
       generateKeys(parameterObject);
       boundSql = mappedStatement.getBoundSql(parameterObject);
     }
@@ -85,7 +86,9 @@ public abstract class BaseStatementHandler implements StatementHandler {
     ErrorContext.instance().sql(boundSql.getSql());
     Statement statement = null;
     try {
+      // 实例化Statement对象
       statement = instantiateStatement(connection);
+      // 设置超时
       setStatementTimeout(statement, transactionTimeout);
       setFetchSize(statement);
       return statement;
@@ -111,6 +114,7 @@ public abstract class BaseStatementHandler implements StatementHandler {
    */
   protected void setStatementTimeout(Statement stmt, Integer transactionTimeout) throws SQLException {
     Integer queryTimeout = null;
+    // 优先使用MappedStatement配置的timeout，如果没有配置，使用Configuration的
     if (mappedStatement.getTimeout() != null) {
       queryTimeout = mappedStatement.getTimeout();
     } else if (configuration.getDefaultStatementTimeout() != null) {
