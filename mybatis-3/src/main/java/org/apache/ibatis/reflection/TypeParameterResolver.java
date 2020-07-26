@@ -49,15 +49,15 @@ public class TypeParameterResolver {
   /**
    * Resolve return type.
    *
-   * @param method
-   *          the method
-   * @param srcType
-   *          the src type
+   * @param method the method
+   * @param srcType the src type
    * @return The return type of the method as {@link Type}. If it has type parameters in the declaration,<br>
    *         they will be resolved to the actual runtime {@link Type}s.
    */
   public static Type resolveReturnType(Method method, Type srcType) {
+    // 获取method的返回值类型的泛型类型，比如List<String>
     Type returnType = method.getGenericReturnType();
+    // 获取声明method的class
     Class<?> declaringClass = method.getDeclaringClass();
     return resolveType(returnType, srcType, declaringClass);
   }
@@ -85,12 +85,16 @@ public class TypeParameterResolver {
 
   private static Type resolveType(Type type, Type srcType, Class<?> declaringClass) {
     if (type instanceof TypeVariable) {
+      // 返回值是TypeVariable(类型参数)
       return resolveTypeVar((TypeVariable<?>) type, srcType, declaringClass);
     } else if (type instanceof ParameterizedType) {
+      // 返回值是泛型
       return resolveParameterizedType((ParameterizedType) type, srcType, declaringClass);
     } else if (type instanceof GenericArrayType) {
+      // 返回值是数组
       return resolveGenericArrayType((GenericArrayType) type, srcType, declaringClass);
     } else {
+      // 返回值是原始类型，即Class
       return type;
     }
   }
@@ -113,9 +117,13 @@ public class TypeParameterResolver {
   }
 
   private static ParameterizedType resolveParameterizedType(ParameterizedType parameterizedType, Type srcType, Class<?> declaringClass) {
+    // 获取泛型的原始类型，<>外面的
     Class<?> rawType = (Class<?>) parameterizedType.getRawType();
+    // 获取泛型的真实类型，<>里面的。如果是Map类型，参数是两个，所以返回一个数组
     Type[] typeArgs = parameterizedType.getActualTypeArguments();
     Type[] args = new Type[typeArgs.length];
+
+    // 遍历解析嵌套的参数类型
     for (int i = 0; i < typeArgs.length; i++) {
       if (typeArgs[i] instanceof TypeVariable) {
         args[i] = resolveTypeVar((TypeVariable<?>) typeArgs[i], srcType, declaringClass);
@@ -127,6 +135,7 @@ public class TypeParameterResolver {
         args[i] = typeArgs[i];
       }
     }
+
     return new ParameterizedTypeImpl(rawType, null, args);
   }
 
@@ -152,10 +161,18 @@ public class TypeParameterResolver {
     return result;
   }
 
+  /**
+   * 解析返回值是类型参数的（e.g. T）
+   * @param typeVar method的返回值类型
+   * @param srcType Mapper接口类型
+   * @param declaringClass 声明method的class
+   * @return
+   */
   private static Type resolveTypeVar(TypeVariable<?> typeVar, Type srcType, Class<?> declaringClass) {
     Type result;
     Class<?> clazz;
     if (srcType instanceof Class) {
+      // mapper 是
       clazz = (Class<?>) srcType;
     } else if (srcType instanceof ParameterizedType) {
       ParameterizedType parameterizedType = (ParameterizedType) srcType;

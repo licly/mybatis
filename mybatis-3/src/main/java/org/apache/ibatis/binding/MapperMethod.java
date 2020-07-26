@@ -248,16 +248,16 @@ public class MapperMethod {
       final String methodName = method.getName();
       // 获取声明该方法的类或接口的class对象
       final Class<?> declaringClass = method.getDeclaringClass();
-      MappedStatement ms = resolveMappedStatement(
-        mapperInterface, methodName, declaringClass, configuration);
+      // 解析获取MappedStatement对象，用于下面获取MappedStatement#id和MappedStatement#sqlCommandType
+      MappedStatement ms = resolveMappedStatement(mapperInterface, methodName, declaringClass, configuration);
+
       if (ms == null) {
         // 如果方法标有@Flush注解，SQL类型是FLUSH
         if (method.getAnnotation(Flush.class) != null) {
           name = null;
           type = SqlCommandType.FLUSH;
         } else {
-          throw new BindingException("Invalid bound statement (not found): "
-              + mapperInterface.getName() + "." + methodName);
+          throw new BindingException("Invalid bound statement (not found): " + mapperInterface.getName() + "." + methodName);
         }
       } else {
         name = ms.getId();
@@ -311,21 +311,29 @@ public class MapperMethod {
    */
   public static class MethodSignature {
 
+    // 返回多条数据，returnType是collection或者array
     private final boolean returnsMany;
+    // 返回值是Map
     private final boolean returnsMap;
     // true：返回值类型是void
     private final boolean returnsVoid;
+    // 不知道什么
     private final boolean returnsCursor;
     private final boolean returnsOptional;
+    // 返回值类型，如果返回值是泛型，returnType=泛型的原始类型
     private final Class<?> returnType;
+    // 如果使用了@MapKey注解，mapKey=@MapKey注解的value
     private final String mapKey;
+    // resultHandler参数在方法参数列表中的索引位置
     private final Integer resultHandlerIndex;
+    // rowBounds参数在方法参数列表中的索引位置
     private final Integer rowBoundsIndex;
     private final ParamNameResolver paramNameResolver;
 
     public MethodSignature(Configuration configuration, Class<?> mapperInterface, Method method) {
       // 获取Mapper方法的返回值类型
       Type resolvedReturnType = TypeParameterResolver.resolveReturnType(method, mapperInterface);
+
       if (resolvedReturnType instanceof Class<?>) {
         this.returnType = (Class<?>) resolvedReturnType;
       } else if (resolvedReturnType instanceof ParameterizedType) {
@@ -334,20 +342,29 @@ public class MapperMethod {
         this.returnType = method.getReturnType();
       }
       this.returnsVoid = void.class.equals(this.returnType);
+      // true：returnType是Collection或者array
       this.returnsMany = configuration.getObjectFactory().isCollection(this.returnType) || this.returnType.isArray();
       this.returnsCursor = Cursor.class.equals(this.returnType);
       this.returnsOptional = Optional.class.equals(this.returnType);
+      // @MapKey注解 的value
       this.mapKey = getMapKey(method);
+      // 此处可能有bug，如果返回值类型时Map，但是没有指定@MapKey注解，returnsMap=null
       this.returnsMap = this.mapKey != null;
 
-      // 记录RowBounds参数位置，用于处理后续的分页查询，同时记录ResultHandler参数位置，用于处理从数据库中检索的每一行数据。
+      // 记录RowBounds参数索引位置，用于处理后续的分页查询
       this.rowBoundsIndex = getUniqueParamIndex(method, RowBounds.class);
+      // 记录ResultHandler参数位置，用于处理从数据库中检索的每一行数据。
       this.resultHandlerIndex = getUniqueParamIndex(method, ResultHandler.class);
 
       // 创建ParamNameResolver对象。ParamNameResolver对象用于解析Mapper方法中的参数名称及参数注解信息。
       this.paramNameResolver = new ParamNameResolver(configuration, method);
     }
 
+    /**
+     * 把args转为SQL 命令中的参数
+     * @param args
+     * @return
+     */
     public Object convertArgsToSqlCommandParam(Object[] args) {
       return paramNameResolver.getNamedParams(args);
     }
@@ -398,9 +415,14 @@ public class MapperMethod {
       return returnsOptional;
     }
 
+    /**
+     * 获取RowBounds参数在方法参数列表的索引位置，不能同时指定多个RowBounds参数，会抛出异常
+     */
     private Integer getUniqueParamIndex(Method method, Class<?> paramType) {
       Integer index = null;
+      // 获取方法所有参数
       final Class<?>[] argTypes = method.getParameterTypes();
+      // 遍历查找RowBounds参数索引位置
       for (int i = 0; i < argTypes.length; i++) {
         if (paramType.isAssignableFrom(argTypes[i])) {
           if (index == null) {

@@ -105,7 +105,7 @@ public class MapperProxy<T> implements InvocationHandler, Serializable {
     }
   }
 
-  // 获取Invoker
+  // 获取Invoker的工厂方法
   private MapperMethodInvoker cachedInvoker(Method method) throws Throwable {
     try {
       // A workaround for https://bugs.openjdk.java.net/browse/JDK-8161372
