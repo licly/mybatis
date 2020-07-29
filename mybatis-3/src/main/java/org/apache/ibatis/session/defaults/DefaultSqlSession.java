@@ -59,6 +59,7 @@ public class DefaultSqlSession implements SqlSession {
    * 标志当前会话是否是脏会话，即进行过增删改操作
    */
   private boolean dirty;
+
   private List<Cursor<?>> cursorList;
 
   public DefaultSqlSession(Configuration configuration, Executor executor, boolean autoCommit) {
@@ -336,6 +337,7 @@ public class DefaultSqlSession implements SqlSession {
 
   /**
    * 在MepperMethod里面已经解析过了，这里重复操作，没理解
+   * 也可以直接通过sqlSession操作库
    * @param object
    * @return
    */

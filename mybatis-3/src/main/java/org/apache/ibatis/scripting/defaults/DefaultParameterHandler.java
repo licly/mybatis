@@ -59,7 +59,7 @@ public class DefaultParameterHandler implements ParameterHandler {
   }
 
   /**
-   * 设置参数
+   * 绑定参数
    */
   @Override
   public void setParameters(PreparedStatement ps) {

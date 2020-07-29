@@ -23,6 +23,7 @@ import java.util.StringJoiner;
 import org.apache.ibatis.reflection.ArrayUtil;
 
 /**
+ * 因为缓存的唯一性由多个属性决定，所以创建了一个CacheKey对象，封装了决定缓存唯一性的所有属性，只有这些属性都相同时，缓存才会命中
  * @author Clinton Begin
  */
 public class CacheKey implements Cloneable, Serializable {
@@ -89,6 +90,9 @@ public class CacheKey implements Cloneable, Serializable {
     }
   }
 
+  /**
+   * 重写equals方法，用来判断缓存是否命中
+   */
   @Override
   public boolean equals(Object object) {
     if (this == object) {

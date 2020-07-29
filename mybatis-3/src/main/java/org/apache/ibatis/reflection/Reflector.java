@@ -49,15 +49,23 @@ import org.apache.ibatis.reflection.property.PropertyNamer;
  */
 public class Reflector {
 
+  // 对应的class
   private final Class<?> type;
+  // 可读属性，即getMethods的keySet
   private final String[] readablePropertyNames;
+  // 可写属性，即setMethods的keySet
   private final String[] writablePropertyNames;
+  // 缓存对应class所有的set方法
   private final Map<String, Invoker> setMethods = new HashMap<>();
+  // 缓存对应class所有的get方法
   private final Map<String, Invoker> getMethods = new HashMap<>();
+  // 缓存set方法参数的类型
   private final Map<String, Class<?>> setTypes = new HashMap<>();
+  // 缓存get方法返回值的类型
   private final Map<String, Class<?>> getTypes = new HashMap<>();
   private Constructor<?> defaultConstructor;
 
+  // 缓存大写的属性名，获取属性名时忽略大小写
   private Map<String, String> caseInsensitivePropertyMap = new HashMap<>();
 
   public Reflector(Class<?> clazz) {

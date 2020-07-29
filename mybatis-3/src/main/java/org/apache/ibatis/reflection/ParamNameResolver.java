@@ -157,8 +157,7 @@ public class ParamNameResolver {
    * 如果object是个集合或数组，包装成ParamMap，否则返回原object
    *
    * @param object a parameter object
-   * @param actualParamName an actual parameter name
-   *                        (If specify a name, set an object to {@link ParamMap} with specified name)
+   * @param actualParamName an actual parameter name (If specify a name, set an object to {@link ParamMap} with specified name)
    * @return a {@link ParamMap}
    * @since 3.5.5
    */
