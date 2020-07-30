@@ -116,6 +116,7 @@ public class TypeAliasRegistry {
       if (typeAliases.containsKey(key)) {
         value = (Class<T>) typeAliases.get(key);
       } else {
+        // 如果是不存在的class的话，这里会抛出ClassNotFoundException
         value = (Class<T>) Resources.classForName(string);
       }
       return value;

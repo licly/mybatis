@@ -23,8 +23,9 @@
 <mapper namespace="org.apache.ibatis.domain.blog.mappers.AuthorMapper">
 
     <parameterMap id="selectAuthor" type="org.apache.ibatis.domain.blog.Author">
-        <parameter property="id" />
+        <parameter property="id" javaType="int" jdbcType="VARCHAR"/>
     </parameterMap>
+
 
     <resultMap id="selectAuthor" type="org.apache.ibatis.domain.blog.Author">
         <id column="id" property="id" />

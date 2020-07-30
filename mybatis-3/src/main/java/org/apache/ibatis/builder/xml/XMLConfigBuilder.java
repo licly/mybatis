@@ -48,6 +48,7 @@ import org.apache.ibatis.transaction.TransactionFactory;
 import org.apache.ibatis.type.JdbcType;
 
 /**
+ * 解析XML配置
  * @author Clinton Begin
  * @author Kazuki Shimizu
  */
@@ -96,6 +97,7 @@ public class XMLConfigBuilder extends BaseBuilder {
       throw new BuilderException("Each XMLConfigBuilder can only be used once.");
     }
     parsed = true;
+    // 解析Mybatis配置文件
     parseConfiguration(parser.evalNode("/configuration"));
     return configuration;
   }
@@ -115,6 +117,7 @@ public class XMLConfigBuilder extends BaseBuilder {
       pluginElement(root.evalNode("plugins"));
       objectFactoryElement(root.evalNode("objectFactory"));
       objectWrapperFactoryElement(root.evalNode("objectWrapperFactory"));
+      // 解析reflector标签
       reflectorFactoryElement(root.evalNode("reflectorFactory"));
       // 解析settings标签
       settingsElement(settings);

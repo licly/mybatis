@@ -243,11 +243,23 @@ public class XMLMapperBuilder extends BaseBuilder {
     }
   }
 
+  /**
+   * <parameterMap> e.g. :
+   *
+   * <parameterMap id="selectAuthor" type="org.apache.ibatis.domain.blog.Author">
+   *         <parameter property="id" javaType="int" jdbcType="VARCHAR"/>
+   * </parameterMap>
+   * @param list
+   */
   private void parameterMapElement(List<XNode> list) {
+    // 遍历解析所有的<parameterMap>标签
     for (XNode parameterMapNode : list) {
+      // 获取id属性
       String id = parameterMapNode.getStringAttribute("id");
+      // 获取type属性，标识这个parameterMap是什么类型的
       String type = parameterMapNode.getStringAttribute("type");
       Class<?> parameterClass = resolveClass(type);
+      // 获取到所有的parameter属性
       List<XNode> parameterNodes = parameterMapNode.evalNodes("parameter");
       List<ParameterMapping> parameterMappings = new ArrayList<>();
       for (XNode parameterNode : parameterNodes) {
