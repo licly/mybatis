@@ -261,6 +261,9 @@ public class XNode {
     return getBooleanAttribute(name, null);
   }
 
+  /**
+   * 获取boolean类型属性
+   */
   public Boolean getBooleanAttribute(String name, Boolean def) {
     String value = attributes.getProperty(name);
     if (value == null) {

@@ -54,6 +54,7 @@ public class XMLStatementBuilder extends BaseBuilder {
   }
 
   public void parseStatementNode() {
+    // 获取到select|insert|update|delete语句的id
     String id = context.getStringAttribute("id");
     String databaseId = context.getStringAttribute("databaseId");
 
@@ -63,11 +64,15 @@ public class XMLStatementBuilder extends BaseBuilder {
 
     // 获取标签名
     String nodeName = context.getNode().getNodeName();
+    // 根据标签名生成SqlCommandType
     SqlCommandType sqlCommandType = SqlCommandType.valueOf(nodeName.toUpperCase(Locale.ENGLISH));
     // 是否是Select类型
     boolean isSelect = sqlCommandType == SqlCommandType.SELECT;
+    // 获取flushCache属性，执行该SQL时是否清除缓存，如果没有配置，SELECT：false，！SELECT：true
     boolean flushCache = context.getBooleanAttribute("flushCache", !isSelect);
+    // 获取flushCache属性，执行该SQL是否利用缓存，如果没有配置，SELECT：true，！SELECT：false
     boolean useCache = context.getBooleanAttribute("useCache", isSelect);
+    // 默认false
     boolean resultOrdered = context.getBooleanAttribute("resultOrdered", false);
 
     // 把<include/>标签内容替换成<sql/>标签定义的SQL片段
@@ -75,8 +80,9 @@ public class XMLStatementBuilder extends BaseBuilder {
     XMLIncludeTransformer includeParser = new XMLIncludeTransformer(configuration, builderAssistant);
     includeParser.applyIncludes(context.getNode());
 
-    // 解析SQL中的参数
+    // 获取配置的parameterType，如果没有，返回null
     String parameterType = context.getStringAttribute("parameterType");
+    // 取出parameterType对应的Class
     Class<?> parameterTypeClass = resolveClass(parameterType);
 
     // 解析LanguageDriver，负责后面解析SQL
@@ -90,12 +96,15 @@ public class XMLStatementBuilder extends BaseBuilder {
     // 通过LanguageDriver解析SQL内容，生成SQLSource对象
     // Parse the SQL (pre: <selectKey> and <include> were parsed and removed)
     KeyGenerator keyGenerator;
+    // 生成<selectKey> id
     String keyStatementId = id + SelectKeyGenerator.SELECT_KEY_SUFFIX;
     keyStatementId = builderAssistant.applyCurrentNamespace(keyStatementId, true);
     // 获取主键生成策略
     if (configuration.hasKeyGenerator(keyStatementId)) {
       keyGenerator = configuration.getKeyGenerator(keyStatementId);
     } else {
+      // 如果没有配置，默认情况下，如果是insert类型，并且configuration配置了useGeneratedKeys，
+      // 会使用Jdbc3KeyGenerator，否则使用NoKeyGenerator
       keyGenerator = context.getBooleanAttribute("useGeneratedKeys",
           configuration.isUseGeneratedKeys() && SqlCommandType.INSERT.equals(sqlCommandType))
           ? Jdbc3KeyGenerator.INSTANCE : NoKeyGenerator.INSTANCE;
@@ -190,17 +199,28 @@ public class XMLStatementBuilder extends BaseBuilder {
     }
   }
 
+  /**
+   * databaseId 是否和 requiredDatabaseId一致
+   * @param id select|insert|update|delete语句的id
+   * @param databaseId select|insert|update|delete语句指定的databaseId
+   * @param requiredDatabaseId configuration配置的databaseId
+   * @return databaseId == requiredDatabaseId
+   */
   private boolean databaseIdMatchesCurrent(String id, String databaseId, String requiredDatabaseId) {
     if (requiredDatabaseId != null) {
       return requiredDatabaseId.equals(databaseId);
     }
+
+    // 走到这里表示databaseId不等于requiredDatabaseId，如果databaseId不为null，二者不然不相同
     if (databaseId != null) {
       return false;
     }
+
     id = builderAssistant.applyCurrentNamespace(id, false);
     if (!this.configuration.hasStatement(id, false)) {
       return true;
     }
+
     // skip this statement if there is a previous one with a not null databaseId
     MappedStatement previous = this.configuration.getMappedStatement(id, false); // issue #2
     return previous.getDatabaseId() == null;

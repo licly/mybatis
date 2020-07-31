@@ -56,6 +56,28 @@ public class XMLConfigBuilder extends BaseBuilder {
 
   private boolean parsed;
   private final XPathParser parser;
+  /**
+   * mybatis可以配置多种环境，可以通过该变量控制使用哪种环境
+   * <environments default="development">
+   *   <environment id="development">
+   *     事务管理器的配置
+   *     在 MyBatis 中有两种类型的事务管理器（也就是 type="[JDBC|MANAGED]"）：
+   *     JDBC – 这个配置直接使用了 JDBC 的提交和回滚设施，它依赖从数据源获得的连接来管理事务作用域。
+   *     MANAGED – 这个配置几乎没做什么。它从不提交或回滚一个连接，而是让容器来管理事务的整个生命周期（比如 JEE 应用服务器的上下文）
+   *     如果正在使用 Spring + MyBatis，则没有必要配置事务管理器，因为 Spring 模块会使用自带的管理器来覆盖前面的配置。
+   *     <transactionManager type="JDBC">
+   *       <property name="..." value="..."/>
+   *     </transactionManager>
+   *     <dataSource type="POOLED">
+   *       <property name="driver" value="${driver}"/>
+   *       <property name="url" value="${url}"/>
+   *       <property name="username" value="${username}"/>
+   *       <property name="password" value="${password}"/>
+   *     </dataSource>
+   *   </environment>
+   * </environments>
+   * 对应<environment>标签的id属性，默认是development
+   */
   private String environment;
   private final ReflectorFactory localReflectorFactory = new DefaultReflectorFactory();
 
@@ -93,11 +115,12 @@ public class XMLConfigBuilder extends BaseBuilder {
   }
 
   public Configuration parse() {
+    // 如果已经解析过，抛出BuilderException
     if (parsed) {
       throw new BuilderException("Each XMLConfigBuilder can only be used once.");
     }
     parsed = true;
-    // 解析Mybatis配置文件
+    // 解析Mybatis配置文件，mybatis所有配置解析都是从这里开始的，包括Mapper
     parseConfiguration(parser.evalNode("/configuration"));
     return configuration;
   }
@@ -109,13 +132,21 @@ public class XMLConfigBuilder extends BaseBuilder {
   private void parseConfiguration(XNode root) {
     try {
       // issue #117 read properties first
+      // 解析<properties>标签
       propertiesElement(root.evalNode("properties"));
+      // 解析<settings>标签
       Properties settings = settingsAsProperties(root.evalNode("settings"));
       loadCustomVfs(settings);
+      // 解析配置的日志实现
       loadCustomLogImpl(settings);
+
+      // 解析<typeAliases>标签
       typeAliasesElement(root.evalNode("typeAliases"));
+      // 解析<plugins>标签
       pluginElement(root.evalNode("plugins"));
+      // 解析<objectFactory>标签，可以通过配置该属性，使用自己的对象工厂
       objectFactoryElement(root.evalNode("objectFactory"));
+
       objectWrapperFactoryElement(root.evalNode("objectWrapperFactory"));
       // 解析reflector标签
       reflectorFactoryElement(root.evalNode("reflectorFactory"));
@@ -138,6 +169,7 @@ public class XMLConfigBuilder extends BaseBuilder {
     if (context == null) {
       return new Properties();
     }
+
     Properties props = context.getChildrenAsProperties();
     // Check that all settings are known to the configuration class
     MetaClass metaConfig = MetaClass.forClass(Configuration.class, localReflectorFactory);
@@ -230,23 +262,37 @@ public class XMLConfigBuilder extends BaseBuilder {
     }
   }
 
+  /**
+   * <properties resource="org/mybatis/example/config.properties">
+   *   <property name="username" value="dev_user"/>
+   *   <property name="password" value="F2Fa3!33TYyg"/>
+   * </properties>
+   */
   private void propertiesElement(XNode context) throws Exception {
     if (context != null) {
       Properties defaults = context.getChildrenAsProperties();
+      // 可以引入外部的配置文件，resource属性是外部配置文件的地址
       String resource = context.getStringAttribute("resource");
+      // 同时也可以通过URL引入
       String url = context.getStringAttribute("url");
+      // resource属性和url属性只能使用一个，不能都配置
       if (resource != null && url != null) {
         throw new BuilderException("The properties element cannot specify both a URL and a resource based property file reference.  Please specify one or the other.");
       }
+
+      // 把外部配置添加到properties
       if (resource != null) {
         defaults.putAll(Resources.getResourceAsProperties(resource));
       } else if (url != null) {
         defaults.putAll(Resources.getUrlAsProperties(url));
       }
+
+      // 也可以在应用启动时将Properties参数传进来，这里进行添加
       Properties vars = configuration.getVariables();
       if (vars != null) {
         defaults.putAll(vars);
       }
+
       parser.setVariables(defaults);
       configuration.setVariables(defaults);
     }
@@ -371,7 +417,7 @@ public class XMLConfigBuilder extends BaseBuilder {
   }
 
   /**
-   * 解析<mappers></mappers>标签
+   * 解析<mappers>标签
    * @param parent
    * @throws Exception
    */
@@ -379,20 +425,28 @@ public class XMLConfigBuilder extends BaseBuilder {
     if (parent == null) {
       return;
     }
+
     for (XNode child : parent.getChildren()) {
       // 通过package标签指定mapper接口包名
+      // <mappers>
+      //   <package name="org.mybatis.builder"/>
+      // </mappers>
       if ("package".equals(child.getName())) {
+        // 得到指定的包名
         String mapperPackage = child.getStringAttribute("name");
         configuration.addMappers(mapperPackage);
-      } else {
-        // 使用相对路径定位mapper文件
+      }
+
+      // 指定文件
+      else {
+        // 使用Mapper文件相对路径定位mapper文件
         // e.g. <mapper resource="org/mybatis/builder/PostMapper.xml"/>
         String resource = child.getStringAttribute("resource");
-        // 使用绝对路径
+        // 使用Mapper文件绝对路径
         // e.g. <mapper url="file:///var/mappers/PostMapper.xml"/>
         String url = child.getStringAttribute("url");
-        // 使用包名
-        // e.g. <package name="org.mybatis.builder"/>
+        // 使用mapper接口，class属性是接口全限定名
+        // e.g. <mapper class="org.mybatis.builder.AuthorMapper"/>
         String mapperClass = child.getStringAttribute("class");
 
         if (resource != null && url == null && mapperClass == null) {
@@ -410,11 +464,11 @@ public class XMLConfigBuilder extends BaseBuilder {
           mapperParser.parse();
 
         } else if (resource == null && url == null && mapperClass != null) {
-          // 使用包名
+          // 使用接口
           Class<?> mapperInterface = Resources.classForName(mapperClass);
           configuration.addMapper(mapperInterface);
         } else {
-          // 不能同时定义两种及以上mapper映射方式
+          // 不能在一个<mapper>标签同时定义两种及以上mapper映射方式
           throw new BuilderException("A mapper element may only specify a url, resource or class, but not more than one.");
         }
       }

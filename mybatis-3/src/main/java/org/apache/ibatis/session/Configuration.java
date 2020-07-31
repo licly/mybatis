@@ -274,6 +274,9 @@ public class Configuration {
    */
   protected ProxyFactory proxyFactory = new JavassistProxyFactory(); // #224 Using internal Javassist instead of OGNL
 
+  /**
+   *
+   */
   protected String databaseId;
   /**
    * Configuration factory class.

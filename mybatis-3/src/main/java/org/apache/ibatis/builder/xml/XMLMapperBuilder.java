@@ -58,6 +58,7 @@ public class XMLMapperBuilder extends BaseBuilder {
   private final XPathParser parser;
   private final MapperBuilderAssistant builderAssistant;
   private final Map<String, XNode> sqlFragments;
+  // mapper文件路径
   private final String resource;
 
   @Deprecated
@@ -91,7 +92,7 @@ public class XMLMapperBuilder extends BaseBuilder {
   }
 
   public void parse() {
-    // resource是否加载
+    // resource对应的Mapper文件是否加载
     if (!configuration.isResourceLoaded(resource)) {
       // 解析mapper文件
       configurationElement(parser.evalNode("/mapper"));
@@ -119,6 +120,7 @@ public class XMLMapperBuilder extends BaseBuilder {
    */
   private void configurationElement(XNode context) {
     try {
+      // 获取namespace属性
       String namespace = context.getStringAttribute("namespace");
       if (namespace == null || namespace.isEmpty()) {
         throw new BuilderException("Mapper's namespace cannot be empty");
@@ -147,12 +149,19 @@ public class XMLMapperBuilder extends BaseBuilder {
    * @param list
    */
   private void buildStatementFromContext(List<XNode> list) {
+    // 如果配置了databaseId
     if (configuration.getDatabaseId() != null) {
       buildStatementFromContext(list, configuration.getDatabaseId());
     }
+
     buildStatementFromContext(list, null);
   }
 
+  /**
+   *
+   * @param list select|insert|update|delete标签集合
+   * @param requiredDatabaseId 配置的databaseId
+   */
   private void buildStatementFromContext(List<XNode> list, String requiredDatabaseId) {
     // 遍历解析所有的select|insert|update|delete语句
     for (XNode context : list) {
@@ -389,6 +398,7 @@ public class XMLMapperBuilder extends BaseBuilder {
     for (XNode context : list) {
       String databaseId = context.getStringAttribute("databaseId");
       String id = context.getStringAttribute("id");
+      // 生成sql片段的id，默认是namespace.id
       id = builderAssistant.applyCurrentNamespace(id, false);
       if (databaseIdMatchesCurrent(id, databaseId, requiredDatabaseId)) {
         sqlFragments.put(id, context);
