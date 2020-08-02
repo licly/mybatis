@@ -74,6 +74,7 @@ public class XMLScriptBuilder extends BaseBuilder {
    * @return 对应的SqlSource对象
    */
   public SqlSource parseScriptNode() {
+    // 把statement里面的SQL转为SqlNode对象
     MixedSqlNode rootSqlNode = parseDynamicTags(context);
     SqlSource sqlSource;
     // 如果是动态SQL，返回DynamicSqlSource，否则返回RawSqlSource

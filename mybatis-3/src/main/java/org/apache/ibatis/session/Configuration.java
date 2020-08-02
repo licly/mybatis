@@ -362,6 +362,7 @@ public class Configuration {
 
   /**
    * 用于注册解析出现异常的XMLStatementBuilder对象。
+   * 当解析Mapper时，如果出现异常，会把出现异常的XMLStatementBuilder添加到这里
    */
   protected final Collection<XMLStatementBuilder> incompleteStatements = new LinkedList<>();
 

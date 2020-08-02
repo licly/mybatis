@@ -41,7 +41,17 @@ public final class MappedStatement {
    * 在命名空间中唯一的标识符，可以被用来引用这条语句。
    */
   private String id;
+
+  /**
+   * 这是一个给驱动的建议值，尝试让驱动程序每次批量返回的结果行数等于这个设置值。 默认值为未设置（unset）（依赖驱动）。
+   * 如果需要查询很多条数据，可以使用分页实现，但是这样效率比较低，需要查询很多次；也可以一次性查出来，但是需要很大内存，一般机器不能承受
+   * 这里可以通过设置fetchSize来提高效率。在服务端一次查询，然后客户端每次拉取fetchSize条数据（https://www.cnblogs.com/baimingqian/p/11761942.html）
+   */
   private Integer fetchSize;
+
+  /**
+   * SQL执行的过期时间
+   */
   private Integer timeout;
 
   /**
@@ -52,7 +62,10 @@ public final class MappedStatement {
   private StatementType statementType;
 
   /**
-   * 参数可选值为FORWARD_ONLY、SCROLL_SENSITIVE或SCROLL_INSENSITIVE，
+   * 参数可选值为:
+   * FORWARD_ONLY（结果集只能向下遍历，不能使用ResultSet#absolute/afterLast/beforeFirst/first/last/previous/relative等方法）
+   * SCROLL_SENSITIVE（返回可滚动的结果集，当数据库变化时，当前结果集同步改变.mysql不支持该类型）
+   * SCROLL_INSENSITIVE（结果集的游标可以上下移动，当数据库变化时，当前结果集不变）
    * 用于设置ResultSet对象的特征，具体可参考第2章JDBC规范的相关内容。
    * 默认未设置，由JDBC驱动决定。
    */

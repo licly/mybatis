@@ -29,7 +29,7 @@ public class DynamicSqlSource implements SqlSource {
   private final Configuration configuration;
 
   /**
-   * 一个SQL标签树的根节点
+   * 一个SQL标签树的根节点，MixSqlNode对象
    */
   private final SqlNode rootSqlNode;
 
@@ -45,7 +45,7 @@ public class DynamicSqlSource implements SqlSource {
    */
   @Override
   public BoundSql getBoundSql(Object parameterObject) {
-    // 新建DynamicContext对象，存储解析后的SQL内容
+    // 新建DynamicContext对象（会创建bindings参数），存储解析后的SQL内容
     DynamicContext context = new DynamicContext(configuration, parameterObject);
     // 解析SQL树
     rootSqlNode.apply(context);

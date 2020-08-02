@@ -114,7 +114,9 @@ public class XMLStatementBuilder extends BaseBuilder {
      * 调用LanguageDriver解析XML为SqlSource对象
      */
     SqlSource sqlSource = langDriver.createSqlSource(configuration, context, parameterTypeClass);
+    // 可选 STATEMENT，PREPARED 或 CALLABLE。这会让 MyBatis 分别使用 Statement，PreparedStatement 或 CallableStatement，默认值：PREPARED。
     StatementType statementType = StatementType.valueOf(context.getStringAttribute("statementType", StatementType.PREPARED.toString()));
+    // 获取fetchSize属性
     Integer fetchSize = context.getIntAttribute("fetchSize");
     Integer timeout = context.getIntAttribute("timeout");
     String parameterMap = context.getStringAttribute("parameterMap");
@@ -126,6 +128,7 @@ public class XMLStatementBuilder extends BaseBuilder {
     if (resultSetTypeEnum == null) {
       resultSetTypeEnum = configuration.getDefaultResultSetType();
     }
+
     String keyProperty = context.getStringAttribute("keyProperty");
     String keyColumn = context.getStringAttribute("keyColumn");
     String resultSets = context.getStringAttribute("resultSets");
