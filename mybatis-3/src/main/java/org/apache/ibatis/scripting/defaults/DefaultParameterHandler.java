@@ -33,6 +33,7 @@ import org.apache.ibatis.type.TypeHandler;
 import org.apache.ibatis.type.TypeHandlerRegistry;
 
 /**
+ * 遍历ParameterMappings，调用合适的TypeHandler将参数绑定到Statement对象
  * @author Clinton Begin
  * @author Eduardo Macarron
  */
@@ -74,6 +75,7 @@ public class DefaultParameterHandler implements ParameterHandler {
           Object value;
           String propertyName = parameterMapping.getProperty();
 
+          // 优先使用additionalParameter，如果bind绑定了参数，则优先使用
           if (boundSql.hasAdditionalParameter(propertyName)) { // issue #448 ask first for additional params
             value = boundSql.getAdditionalParameter(propertyName);
           } else if (parameterObject == null) {

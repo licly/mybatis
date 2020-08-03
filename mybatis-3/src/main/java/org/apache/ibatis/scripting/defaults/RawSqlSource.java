@@ -55,6 +55,7 @@ public class RawSqlSource implements SqlSource {
 
   @Override
   public BoundSql getBoundSql(Object parameterObject) {
+    // 创建对象时已经把SqlSource转为了StaticSqlSource
     return sqlSource.getBoundSql(parameterObject);
   }
 
