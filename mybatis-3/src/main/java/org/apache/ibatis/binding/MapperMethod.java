@@ -315,7 +315,7 @@ public class MapperMethod {
 
     // 返回多条数据，returnType是collection或者array
     private final boolean returnsMany;
-    // 返回值是Map
+    // 返回值是Map，通过方法上是否添加@MapKey注解决定
     private final boolean returnsMap;
     // true：返回值类型是void
     private final boolean returnsVoid;
@@ -324,7 +324,7 @@ public class MapperMethod {
     private final boolean returnsOptional;
     // 返回值类型，如果返回值是泛型，returnType=泛型的原始类型
     private final Class<?> returnType;
-    // 如果使用了@MapKey注解，mapKey=@MapKey注解的value
+    // @MapKey注解的value，使用selectMap时，通过@MapKey制定Map的key用哪个属性
     private final String mapKey;
     // resultHandler参数在方法参数列表中的索引位置
     private final Integer resultHandlerIndex;

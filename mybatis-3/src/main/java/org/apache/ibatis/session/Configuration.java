@@ -96,7 +96,7 @@ import org.apache.ibatis.type.TypeHandler;
 import org.apache.ibatis.type.TypeHandlerRegistry;
 
 /**
- * 定义一系列控制mybatis运行时行为的属性，可以通过<setting>标签指定
+ * 定义一系列控制mybatis运行时行为的属性，可以通过<setting>标签指定，类似于Context模式
  * e.g.
  * <settings>
  *   <setting name="cacheEnabled" value="true"/>
@@ -254,6 +254,26 @@ public class Configuration {
    */
   protected AutoMappingUnknownColumnBehavior autoMappingUnknownColumnBehavior = AutoMappingUnknownColumnBehavior.NONE;
 
+  /**
+   * <properties resource="org/mybatis/example/config.properties">
+   *   <property name="username" value="dev_user"/>
+   *   <property name="password" value="F2Fa3!33TYyg"/>
+   * </properties>
+   * 可以通过以上方式设置，也可以创建SqlSessionFactory时传入properties
+   * 如果一个属性在不只一个地方进行了配置，那么，MyBatis 将按照下面的顺序来加载：
+   * 1.首先读取在 properties 元素体内指定的属性。
+   * 2.然后根据 properties 元素中的 resource 属性读取类路径下属性文件，或根据 url 属性指定的路径读取属性文件，并覆盖之前读取过的同名属性。
+   * 3.最后读取作为方法参数传递的属性，并覆盖之前读取过的同名属性。
+   *
+   * 设置好的属性可以在整个配置文件中用来替换需要动态配置的属性值。e.g.
+   * <dataSource type="POOLED">
+   *   <property name="driver" value="${driver}"/>
+   *   <property name="url" value="${url}"/>
+   *   <property name="username" value="${username}"/>
+   *   <property name="password" value="${password}"/>
+   * </dataSource>
+   *  username 和 password 、driver、url 将会由 variables 元素中设置的相应值来替换
+   */
   protected Properties variables = new Properties();
   protected ReflectorFactory reflectorFactory = new DefaultReflectorFactory();
 

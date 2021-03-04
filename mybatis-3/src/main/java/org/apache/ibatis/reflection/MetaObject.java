@@ -28,6 +28,7 @@ import org.apache.ibatis.reflection.wrapper.ObjectWrapper;
 import org.apache.ibatis.reflection.wrapper.ObjectWrapperFactory;
 
 /**
+ * 使用ONGL表达式便捷操作对象属性的反射工具类
  * @author Clinton Begin
  */
 public class MetaObject {

@@ -21,7 +21,7 @@ import java.util.Map;
 import org.apache.ibatis.cache.decorators.TransactionalCache;
 
 /**
- * 管理CachingExecutor所有的二级缓存对象
+ * 管理CachingExecutor所有的二级缓存对象。这里将二级缓存包装成TransactionalCache对象
  * @author Clinton Begin
  */
 public class TransactionalCacheManager {
@@ -62,6 +62,7 @@ public class TransactionalCacheManager {
    * 返回一个二级缓存对象，如果没有就新建一个
    */
   private TransactionalCache getTransactionalCache(Cache cache) {
+    // 创建TransactionalCache对象包装cache。TransactionalCache::new这里会接收cache作为入参
     return transactionalCaches.computeIfAbsent(cache, TransactionalCache::new);
   }
 

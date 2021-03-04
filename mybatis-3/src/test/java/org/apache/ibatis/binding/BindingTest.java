@@ -21,13 +21,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.lang.reflect.Parameter;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import javassist.util.proxy.Proxy;
 
@@ -90,6 +86,16 @@ class BindingTest {
       assertEquals("jim", b.getAuthor().getUsername());
       assertEquals("********", b.getAuthor().getPassword());
       assertEquals(2, b.getPosts().size());
+    }
+  }
+
+  @Test
+  void getName() throws NoSuchMethodException {
+    Class<ArrayList> clazz = ArrayList.class;
+    Method method = clazz.getDeclaredMethod("removeRange", int.class, int.class);
+
+    for (Parameter parameter : method.getParameters()) {
+      System.out.println(parameter.getName());
     }
   }
 
@@ -540,7 +546,7 @@ class BindingTest {
   void shouldFailWhenSelectingOneBlogWithNonExistentNestedParam() {
     try (SqlSession session = sqlSessionFactory.openSession()) {
       BoundBlogMapper mapper = session.getMapper(BoundBlogMapper.class);
-      mapper.selectBlogByNonExistentNestedParam(1, Collections.<String, Object>emptyMap());
+      mapper.selectBlogByNonExistentNestedParam(1, Collections.emptyMap());
     }
   }
 

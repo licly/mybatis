@@ -34,6 +34,7 @@ import org.apache.ibatis.reflection.ReflectionException;
 import org.apache.ibatis.reflection.Reflector;
 
 /**
+ * 对象工厂，用于创建Mapper映射结果集对象
  * @author Clinton Begin
  */
 public class DefaultObjectFactory implements ObjectFactory, Serializable {
@@ -45,6 +46,13 @@ public class DefaultObjectFactory implements ObjectFactory, Serializable {
     return create(type, null, null);
   }
 
+  /**
+   *
+   * @param type 对象类型
+   * @param constructorArgTypes 构造器参数类型
+   * @param constructorArgs 构造器参数
+   * @return type类型的对象
+   */
   @SuppressWarnings("unchecked")
   @Override
   public <T> T create(Class<T> type, List<Class<?>> constructorArgTypes, List<Object> constructorArgs) {

@@ -119,6 +119,7 @@ public class XMLConfigBuilder extends BaseBuilder {
     if (parsed) {
       throw new BuilderException("Each XMLConfigBuilder can only be used once.");
     }
+    // 标志为已解析
     parsed = true;
     // 解析Mybatis配置文件，mybatis所有配置解析都是从这里开始的，包括Mapper
     parseConfiguration(parser.evalNode("/configuration"));
@@ -132,9 +133,9 @@ public class XMLConfigBuilder extends BaseBuilder {
   private void parseConfiguration(XNode root) {
     try {
       // issue #117 read properties first
-      // 解析<properties>标签
+      // 先解析<properties>标签，因为下面的标签解析可能引用到properties中的属性
       propertiesElement(root.evalNode("properties"));
-      // 解析<settings>标签
+      // 将<settings>标签解析为Properties
       Properties settings = settingsAsProperties(root.evalNode("settings"));
       loadCustomVfs(settings);
       // 解析配置的日志实现
@@ -150,11 +151,12 @@ public class XMLConfigBuilder extends BaseBuilder {
       objectWrapperFactoryElement(root.evalNode("objectWrapperFactory"));
       // 解析reflector标签
       reflectorFactoryElement(root.evalNode("reflectorFactory"));
-      // 解析settings标签
+      // 设置settings属性
       settingsElement(settings);
       // read it after objectFactory and objectWrapperFactory issue #631
+      // 解析<environments>
       environmentsElement(root.evalNode("environments"));
-      //
+      // 解析<databaseIdProvider>
       databaseIdProviderElement(root.evalNode("databaseIdProvider"));
       // 解析TypeHandlers标签
       typeHandlerElement(root.evalNode("typeHandlers"));
@@ -173,6 +175,7 @@ public class XMLConfigBuilder extends BaseBuilder {
     Properties props = context.getChildrenAsProperties();
     // Check that all settings are known to the configuration class
     MetaClass metaConfig = MetaClass.forClass(Configuration.class, localReflectorFactory);
+    // 校验是否存在不正确setting属性
     for (Object key : props.keySet()) {
       if (!metaConfig.hasSetter(String.valueOf(key))) {
         throw new BuilderException("The setting " + key + " is not known.  Make sure you spelled it correctly (case sensitive).");
@@ -200,13 +203,20 @@ public class XMLConfigBuilder extends BaseBuilder {
     configuration.setLogImpl(logImpl);
   }
 
+  /**
+   * 解析自定义别名
+   * @param parent <typeAliases></typeAliases>标签
+   */
   private void typeAliasesElement(XNode parent) {
     if (parent != null) {
       for (XNode child : parent.getChildren()) {
+        // <package name="xxx"> 标签处理，每一个xxx包下的bean都会将类名首字母小写作为别名
         if ("package".equals(child.getName())) {
           String typeAliasPackage = child.getStringAttribute("name");
           configuration.getTypeAliasRegistry().registerAliases(typeAliasPackage);
+
         } else {
+          // <typeAlias alias="xxx" type="xxx.xxx"/>
           String alias = child.getStringAttribute("alias");
           String type = child.getStringAttribute("type");
           try {
@@ -224,18 +234,37 @@ public class XMLConfigBuilder extends BaseBuilder {
     }
   }
 
+  /**
+   * 解析插件
+   * <plugins>
+   *   <plugin interceptor="org.mybatis.example.ExamplePlugin">
+   *     <property name="someProperty" value="100"/>
+   *   </plugin>
+   * </plugins>
+   * @param parent <plugins></plugins>
+   */
   private void pluginElement(XNode parent) throws Exception {
     if (parent != null) {
       for (XNode child : parent.getChildren()) {
         String interceptor = child.getStringAttribute("interceptor");
         Properties properties = child.getChildrenAsProperties();
+        // 创建插件实例
         Interceptor interceptorInstance = (Interceptor) resolveClass(interceptor).getDeclaredConstructor().newInstance();
+        // 设置属性
         interceptorInstance.setProperties(properties);
+        // 添加到Configuration
         configuration.addInterceptor(interceptorInstance);
       }
     }
   }
 
+  /**
+   * 解析自定义ObjectFactory
+   * <objectFactory type="org.mybatis.example.ExampleObjectFactory">
+   *   <property name="someProperty" value="100"/>
+   * </objectFactory>
+   * @param context <objectFactory>
+   */
   private void objectFactoryElement(XNode context) throws Exception {
     if (context != null) {
       String type = context.getStringAttribute("type");
@@ -263,10 +292,7 @@ public class XMLConfigBuilder extends BaseBuilder {
   }
 
   /**
-   * <properties resource="org/mybatis/example/config.properties">
-   *   <property name="username" value="dev_user"/>
-   *   <property name="password" value="F2Fa3!33TYyg"/>
-   * </properties>
+   * 解析properties标签
    */
   private void propertiesElement(XNode context) throws Exception {
     if (context != null) {
@@ -298,6 +324,10 @@ public class XMLConfigBuilder extends BaseBuilder {
     }
   }
 
+  /**
+   * 设置Settings属性
+   * @param props
+   */
   private void settingsElement(Properties props) {
     configuration.setAutoMappingBehavior(AutoMappingBehavior.valueOf(props.getProperty("autoMappingBehavior", "PARTIAL")));
     configuration.setAutoMappingUnknownColumnBehavior(AutoMappingUnknownColumnBehavior.valueOf(props.getProperty("autoMappingUnknownColumnBehavior", "NONE")));
@@ -328,13 +358,33 @@ public class XMLConfigBuilder extends BaseBuilder {
     configuration.setShrinkWhitespacesInSql(booleanValueOf(props.getProperty("shrinkWhitespacesInSql"), false));
   }
 
+  /**
+   * 解析设置环境
+   * <environments default="development">
+   *   <environment id="development">
+   *     <transactionManager type="JDBC">
+   *       <property name="..." value="..."/>
+   *     </transactionManager>
+   *     <dataSource type="POOLED">
+   *       <property name="driver" value="${driver}"/>
+   *       <property name="url" value="${url}"/>
+   *       <property name="username" value="${username}"/>
+   *       <property name="password" value="${password}"/>
+   *     </dataSource>
+   *   </environment>
+   * </environments>
+   * @param context <environments></environments>
+   */
   private void environmentsElement(XNode context) throws Exception {
     if (context != null) {
       if (environment == null) {
+        // 默认使用default环境
         environment = context.getStringAttribute("default");
       }
+
       for (XNode child : context.getChildren()) {
         String id = child.getStringAttribute("id");
+        // 查找指定的环境
         if (isSpecifiedEnvironment(id)) {
           TransactionFactory txFactory = transactionManagerElement(child.evalNode("transactionManager"));
           DataSourceFactory dsFactory = dataSourceElement(child.evalNode("dataSource"));
@@ -348,6 +398,17 @@ public class XMLConfigBuilder extends BaseBuilder {
     }
   }
 
+  /**
+   * Mybatis可以根据不同的数据库厂商执行不同的语句，依赖于Mapper映射语句的databaseId属性
+   * 解析<databaseIdProvider>标签
+   * <databaseIdProvider type="DB_VENDOR">
+   *   <property name="SQL Server" value="sqlserver"/>
+   *   <property name="DB2" value="db2"/>
+   *   <property name="Oracle" value="oracle" />
+   * </databaseIdProvider>
+   * @param context <databaseIdProvider></databaseIdProvider>
+   * @throws Exception
+   */
   private void databaseIdProviderElement(XNode context) throws Exception {
     DatabaseIdProvider databaseIdProvider = null;
     if (context != null) {
@@ -369,8 +430,11 @@ public class XMLConfigBuilder extends BaseBuilder {
 
   private TransactionFactory transactionManagerElement(XNode context) throws Exception {
     if (context != null) {
+      // 事务管理器类型 type="[JDBC|MANAGED]" 见官方文档
       String type = context.getStringAttribute("type");
+      // DataSource 属性
       Properties props = context.getChildrenAsProperties();
+      // 从别名注册中心获取TransactionFactory类型，然后实例化
       TransactionFactory factory = (TransactionFactory) resolveClass(type).getDeclaredConstructor().newInstance();
       factory.setProperties(props);
       return factory;
@@ -380,6 +444,7 @@ public class XMLConfigBuilder extends BaseBuilder {
 
   private DataSourceFactory dataSourceElement(XNode context) throws Exception {
     if (context != null) {
+      // 数据源类型 type="[UNPOOLED|POOLED|JNDI]"
       String type = context.getStringAttribute("type");
       Properties props = context.getChildrenAsProperties();
       DataSourceFactory factory = (DataSourceFactory) resolveClass(type).getDeclaredConstructor().newInstance();
@@ -389,9 +454,17 @@ public class XMLConfigBuilder extends BaseBuilder {
     throw new BuilderException("Environment declaration requires a DataSourceFactory.");
   }
 
+  /**
+   * 解析TypeHandler
+   * <typeHandlers>
+   *   <typeHandler handler="org.mybatis.example.ExampleTypeHandler"/>
+   * </typeHandlers>
+   * @param parent
+   */
   private void typeHandlerElement(XNode parent) {
     if (parent != null) {
       for (XNode child : parent.getChildren()) {
+        // 处理整个包下的TypeHandler
         if ("package".equals(child.getName())) {
           String typeHandlerPackage = child.getStringAttribute("name");
           typeHandlerRegistry.register(typeHandlerPackage);
@@ -475,6 +548,11 @@ public class XMLConfigBuilder extends BaseBuilder {
     }
   }
 
+  /**
+   * 是否是指定的环境
+   * @param id
+   * @return
+   */
   private boolean isSpecifiedEnvironment(String id) {
     if (environment == null) {
       throw new BuilderException("No environment specified.");

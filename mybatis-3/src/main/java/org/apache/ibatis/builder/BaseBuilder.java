@@ -108,6 +108,12 @@ public abstract class BaseBuilder {
     }
   }
 
+  /**
+   * 根据别名获取Class
+   * @param alias 别名
+   * @param <T>
+   * @return
+   */
   protected <T> Class<? extends T> resolveClass(String alias) {
     if (alias == null) {
       return null;
@@ -145,6 +151,12 @@ public abstract class BaseBuilder {
     return handler;
   }
 
+  /**
+   * 解析别名
+   * @param alias
+   * @param <T>
+   * @return
+   */
   protected <T> Class<? extends T> resolveAlias(String alias) {
     return typeAliasRegistry.resolveAlias(alias);
   }

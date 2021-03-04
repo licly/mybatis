@@ -86,9 +86,7 @@ public class CachingExecutor implements Executor {
 
   @Override
   public <E> List<E> query(MappedStatement ms, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler) throws SQLException {
-    // 取出绑定的SQL
     BoundSql boundSql = ms.getBoundSql(parameterObject);
-    // 创建缓存的key
     CacheKey key = createCacheKey(ms, parameterObject, rowBounds, boundSql);
     return query(ms, parameterObject, rowBounds, resultHandler, key, boundSql);
   }
@@ -96,8 +94,10 @@ public class CachingExecutor implements Executor {
   @Override
   public <E> List<E> query(MappedStatement ms, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler, CacheKey key, BoundSql boundSql)
       throws SQLException {
-    // 获取MappedStatement的二级缓存Cache对象
+    // 获取MappedStatement的二级缓存Cache对象，如果启用了二级缓存，这里cache != null
+    // 通过@CacheNameSpace或者<Cache> 注解启动二级缓存
     Cache cache = ms.getCache();
+    // 开启了二级缓存
     if (cache != null) {
       flushCacheIfRequired(ms);
       if (ms.isUseCache() && resultHandler == null) {
