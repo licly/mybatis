@@ -67,6 +67,7 @@ public class MapperProxy<T> implements InvocationHandler, Serializable {
   static {
     Method privateLookupIn;
     try {
+      // 根据MethodHandles中是否存在privateLookupIn判断是JDK8 OR JDK9，JDK9接口可以声明私有方法
       privateLookupIn = MethodHandles.class.getMethod("privateLookupIn", Class.class, MethodHandles.Lookup.class);
     } catch (NoSuchMethodException e) {
       privateLookupIn = null;
@@ -123,8 +124,10 @@ public class MapperProxy<T> implements InvocationHandler, Serializable {
         if (m.isDefault()) {
           try {
             if (privateLookupInMethod == null) {
+              // Java8
               return new DefaultMethodInvoker(getMethodHandleJava8(method));
             } else {
+              // Java9
               return new DefaultMethodInvoker(getMethodHandleJava9(method));
             }
           } catch (IllegalAccessException | InstantiationException | InvocationTargetException
